@@ -1,0 +1,31 @@
+# Dependencies
+node_modules/
+.npm
+.yarn
+
+# Build outputs
+# dist/ <- コメントアウト（GitHub Pagesで必要）
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Temporary files
+.tmp/
+.temp/
+
+# Environment variables
+.env
+.env.local
+.env.production
+
+# Cache
+.cache/
