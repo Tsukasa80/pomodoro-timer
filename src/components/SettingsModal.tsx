@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { FaTimes, FaSave } from 'react-icons/fa';
 import { useAppStore } from '../store';
+import { triggerVibration, playNotificationSound } from '../utils/notifications';
 
 const SettingsModal: React.FC = () => {
   const {
@@ -31,6 +32,17 @@ const SettingsModal: React.FC = () => {
       ...prev,
       [field]: value,
     }));
+  };
+
+  const handleTestVibration = () => {
+    const result = triggerVibration();
+    if (!result) {
+      alert('このデバイスではバイブレーションが利用できません。\n\n可能な原因：\n• デバイスがバイブレーションに対応していない\n• HTTPS接続が必要\n• ブラウザがサポートしていない（例：iOS Safari）');
+    }
+  };
+
+  const handleTestSound = () => {
+    playNotificationSound(formData.soundVolume);
   };
 
   if (!showSettings) return null;
@@ -233,9 +245,18 @@ const SettingsModal: React.FC = () => {
 
               {formData.enableSound && (
                 <div className="ml-4 space-y-2">
-                  <label className="block text-sm font-medium text-gray-700">
-                    音量
-                  </label>
+                  <div className="flex items-center justify-between">
+                    <label className="block text-sm font-medium text-gray-700">
+                      音量
+                    </label>
+                    <button
+                      type="button"
+                      onClick={handleTestSound}
+                      className="px-3 py-1 text-xs bg-yellow-100 text-yellow-800 rounded-md hover:bg-yellow-200 transition-colors"
+                    >
+                      テスト
+                    </button>
+                  </div>
                   <div className="flex items-center space-x-3">
                     <input
                       type="range"
@@ -259,15 +280,24 @@ const SettingsModal: React.FC = () => {
                     モバイルデバイスで振動します（対応端末のみ）
                   </div>
                 </div>
-                <label className="relative inline-flex items-center cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={formData.enableVibration}
-                    onChange={(e) => handleInputChange('enableVibration', e.target.checked)}
-                    className="sr-only peer"
-                  />
-                  <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-purple-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div>
-                </label>
+                <div className="flex items-center space-x-3">
+                  <button
+                    type="button"
+                    onClick={handleTestVibration}
+                    className="px-3 py-1 text-xs bg-purple-100 text-purple-800 rounded-md hover:bg-purple-200 transition-colors"
+                  >
+                    テスト
+                  </button>
+                  <label className="relative inline-flex items-center cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={formData.enableVibration}
+                      onChange={(e) => handleInputChange('enableVibration', e.target.checked)}
+                      className="sr-only peer"
+                    />
+                    <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-purple-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div>
+                  </label>
+                </div>
               </div>
 
               <div className="flex items-center justify-between">

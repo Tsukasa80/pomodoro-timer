@@ -94,9 +94,33 @@ export const playNotificationSound = (volume: number = 80) => {
 
 // バイブレーション
 export const triggerVibration = () => {
-  if ('vibrate' in navigator) {
-    // パターン: 振動200ms, 停止100ms, 振動200ms, 停止100ms, 振動300ms
-    navigator.vibrate([200, 100, 200, 100, 300]);
+  try {
+    // バイブレーション機能の確認
+    if (!('vibrate' in navigator)) {
+      console.log('このデバイスはバイブレーションに対応していません');
+      return false;
+    }
+
+    // HTTPSでない場合の警告
+    if (location.protocol !== 'https:' && location.hostname !== 'localhost') {
+      console.warn('バイブレーション機能にはHTTPS接続が必要です');
+      return false;
+    }
+
+    // 強めのバイブレーションパターンに変更
+    // パターン: 振動400ms, 停止150ms, 振動400ms, 停止150ms, 振動600ms
+    const result = navigator.vibrate([400, 150, 400, 150, 600]);
+    
+    if (!result) {
+      console.warn('バイブレーションの実行に失敗しました');
+      return false;
+    }
+    
+    console.log('バイブレーションを実行しました');
+    return true;
+  } catch (error) {
+    console.error('バイブレーションエラー:', error);
+    return false;
   }
 };
 
