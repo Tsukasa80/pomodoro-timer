@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { FaPlus, FaTrash, FaEdit, FaCheck, FaTimes, FaPlay, FaStop, FaCog, FaClock } from 'react-icons/fa';
+import { FaPlus, FaTrash, FaEdit, FaCheck, FaTimes, FaPlay, FaStop, FaClock } from 'react-icons/fa';
 import { useAppStore } from '../store';
 import type { Todo } from '../types';
 
