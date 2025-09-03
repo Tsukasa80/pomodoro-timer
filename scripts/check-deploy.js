@@ -60,6 +60,17 @@ try {
     }
   }
   
+  // デプロイ時の重要チェック：ビルド後ファイルがコミットされているかを確認
+  const distJsMatch = indexContent.match(/src="\.\/assets\/([^"]*\.js)"/);
+  if (distJsMatch) {
+    const distJsFile = `assets/${distJsMatch[1]}`;
+    if (!fs.existsSync(distJsFile)) {
+      console.log(`  ❌ デプロイ用JSファイルが不足: ${distJsFile}`);
+      console.log(`  💡 解決方法: npm run build を実行してから npm run prepare-deploy を実行してください`);
+      hasErrors = true;
+    }
+  }
+  
 } catch (error) {
   console.log('  ❌ index.htmlの読み込みエラー:', error.message);
   hasErrors = true;

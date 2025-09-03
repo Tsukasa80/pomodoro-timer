@@ -108,13 +108,40 @@ git push origin main
 
 ## 📋 デプロイ前チェックリスト
 
+### ⚡ 自動チェック（必須）
+```bash
+npm run check-deploy
+```
+
+### 📝 手動確認項目
+
+#### 🔧 ビルドとファイル構造
 - [ ] `npm run build` が成功する
 - [ ] `npm run check-deploy` でエラーなし
-- [ ] `index.html` のパスがすべて相対パス（`./`）
 - [ ] `assets/` フォルダにJSとCSSが存在
 - [ ] `404.html` が存在（SPA対応）
+
+#### 🔗 パス設定の確認
+- [ ] `index.html` のパスがすべて相対パス（`./`）
+- [ ] JSファイル参照が `./assets/index-xxx.js` 形式
+- [ ] CSSファイル参照が `./assets/index-xxx.css` 形式
+- [ ] **絶対パス `/pomodoro-timer/assets/` は使用禁止**
+
+#### 🚀 デプロイ確認
 - [ ] GitHub Actionsワークフローが無効
 - [ ] ローカルで `npm run preview` が正常動作
+- [ ] 本番URL `https://tsukasa80.github.io/pomodoro-timer/` で動作確認
+
+#### 🛠 トラブルシューティング手順
+1. **白い画面が表示される場合**:
+   - ブラウザの開発者ツールでエラーを確認
+   - `npm run check-deploy` で問題を特定
+   - パスが相対パスになっているか確認
+   
+2. **JSファイルが見つからない場合**:
+   - `npm run build` を再実行
+   - `npm run prepare-deploy` でファイルをコピー
+   - `git add . && git commit && git push` で更新
 
 ## 🛠 設定ファイル重要ポイント
 
