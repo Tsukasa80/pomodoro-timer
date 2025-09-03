@@ -46,46 +46,41 @@ export const sendBrowserNotification = (mode: TimerMode) => {
   });
 };
 
-// 音声通知を再生
+// 音声通知を再生（優しいチャイム音）
 export const playNotificationSound = (volume: number = 80) => {
   try {
-    // Web Audio APIを使用してビープ音を生成
+    // Web Audio APIを使用して優しいチャイム音を生成
     const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
-    const oscillator = audioContext.createOscillator();
-    const gainNode = audioContext.createGain();
     
-    oscillator.connect(gainNode);
-    gainNode.connect(audioContext.destination);
+    // メロディーのような優しい音階 (C-E-G のメジャーコード)
+    const frequencies = [523.25, 659.25, 783.99]; // C5, E5, G5
+    const noteDuration = 0.5; // 各音の長さ
+    const fadeTime = 0.1; // フェードイン・フェードアウト時間
     
-    // 音の設定
-    oscillator.frequency.setValueAtTime(800, audioContext.currentTime); // 800Hz
-    gainNode.gain.setValueAtTime(volume / 100, audioContext.currentTime);
-    
-    // 3回のビープ音
-    oscillator.start();
-    oscillator.stop(audioContext.currentTime + 0.1);
-    
-    setTimeout(() => {
-      const oscillator2 = audioContext.createOscillator();
-      const gainNode2 = audioContext.createGain();
-      oscillator2.connect(gainNode2);
-      gainNode2.connect(audioContext.destination);
-      oscillator2.frequency.setValueAtTime(800, audioContext.currentTime);
-      gainNode2.gain.setValueAtTime(volume / 100, audioContext.currentTime);
-      oscillator2.start();
-      oscillator2.stop(audioContext.currentTime + 0.1);
-    }, 200);
-    
-    setTimeout(() => {
-      const oscillator3 = audioContext.createOscillator();
-      const gainNode3 = audioContext.createGain();
-      oscillator3.connect(gainNode3);
-      gainNode3.connect(audioContext.destination);
-      oscillator3.frequency.setValueAtTime(1000, audioContext.currentTime); // 高い音
-      gainNode3.gain.setValueAtTime(volume / 100, audioContext.currentTime);
-      oscillator3.start();
-      oscillator3.stop(audioContext.currentTime + 0.3);
-    }, 400);
+    frequencies.forEach((frequency, index) => {
+      setTimeout(() => {
+        const oscillator = audioContext.createOscillator();
+        const gainNode = audioContext.createGain();
+        
+        oscillator.connect(gainNode);
+        gainNode.connect(audioContext.destination);
+        
+        // 優しいサイン波を使用
+        oscillator.type = 'sine';
+        oscillator.frequency.setValueAtTime(frequency, audioContext.currentTime);
+        
+        // 音量を設定（少し控えめに）
+        const actualVolume = (volume / 100) * 0.6;
+        
+        // フェードイン・フェードアウト効果
+        gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+        gainNode.gain.linearRampToValueAtTime(actualVolume, audioContext.currentTime + fadeTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + noteDuration);
+        
+        oscillator.start(audioContext.currentTime);
+        oscillator.stop(audioContext.currentTime + noteDuration);
+      }, index * 200); // 各音を200ms間隔で再生
+    });
     
   } catch (error) {
     console.warn('音声通知を再生できませんでした:', error);
@@ -107,9 +102,9 @@ export const triggerVibration = () => {
       return false;
     }
 
-    // 強めのバイブレーションパターンに変更
-    // パターン: 振動400ms, 停止150ms, 振動400ms, 停止150ms, 振動600ms
-    const result = navigator.vibrate([400, 150, 400, 150, 600]);
+    // 優しいバイブレーションパターンに変更
+    // パターン: 振動200ms, 停止100ms, 振動200ms, 停止100ms, 振動300ms
+    const result = navigator.vibrate([200, 100, 200, 100, 300]);
     
     if (!result) {
       console.warn('バイブレーションの実行に失敗しました');

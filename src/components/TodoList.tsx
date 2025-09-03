@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { FaPlus, FaTrash, FaEdit, FaCheck, FaTimes, FaPlay, FaStop } from 'react-icons/fa';
+import { FaPlus, FaTrash, FaEdit, FaCheck, FaTimes, FaPlay, FaStop, FaCog, FaClock } from 'react-icons/fa';
 import { useAppStore } from '../store';
 import type { Todo } from '../types';
 
@@ -20,6 +20,14 @@ const TodoList: React.FC = () => {
   const [editingTodoId, setEditingTodoId] = useState<string | null>(null);
   const [editTitle, setEditTitle] = useState('');
   const [editPomodoros, setEditPomodoros] = useState(1);
+  
+  // Task-specific timer settings
+  const [showCustomSettings, setShowCustomSettings] = useState<string | null>(null);
+  const [customPomodoro, setCustomPomodoro] = useState(25);
+  const [customShortBreak, setCustomShortBreak] = useState(5);
+  const [customLongBreak, setCustomLongBreak] = useState(15);
+  const [customAutoStartBreak, setCustomAutoStartBreak] = useState(true);
+  const [customAutoStartPomodoro, setCustomAutoStartPomodoro] = useState(true);
 
   const handleAddTodo = (e: React.FormEvent) => {
     e.preventDefault();
@@ -62,6 +70,45 @@ const TodoList: React.FC = () => {
       // Start pomodoro for the selected task
       startPomodoroForTask(todoId);
     }
+  };
+
+  const handleShowCustomSettings = (todo: Todo) => {
+    setShowCustomSettings(todo.id);
+    // Load existing custom settings if any
+    if (todo.customSettings) {
+      setCustomPomodoro(todo.customSettings.pomodoroMinutes || 25);
+      setCustomShortBreak(todo.customSettings.shortBreakMinutes || 5);
+      setCustomLongBreak(todo.customSettings.longBreakMinutes || 15);
+      setCustomAutoStartBreak(todo.customSettings.autoStartBreak ?? true);
+      setCustomAutoStartPomodoro(todo.customSettings.autoStartPomodoro ?? true);
+    } else {
+      // Reset to defaults
+      setCustomPomodoro(25);
+      setCustomShortBreak(5);
+      setCustomLongBreak(15);
+      setCustomAutoStartBreak(true);
+      setCustomAutoStartPomodoro(true);
+    }
+  };
+
+  const handleSaveCustomSettings = (todoId: string) => {
+    updateTodo(todoId, {
+      customSettings: {
+        pomodoroMinutes: customPomodoro,
+        shortBreakMinutes: customShortBreak,
+        longBreakMinutes: customLongBreak,
+        autoStartBreak: customAutoStartBreak,
+        autoStartPomodoro: customAutoStartPomodoro,
+      }
+    });
+    setShowCustomSettings(null);
+  };
+
+  const handleClearCustomSettings = (todoId: string) => {
+    updateTodo(todoId, {
+      customSettings: undefined
+    });
+    setShowCustomSettings(null);
   };
 
   const activeTodos = todos.filter(todo => !todo.completed);
@@ -172,12 +219,24 @@ const TodoList: React.FC = () => {
                         className="w-4 h-4 text-red-600 bg-gray-100 border-gray-300 rounded focus:ring-red-500"
                       />
                       <div className="flex-1">
-                        <div className="font-medium text-gray-800">{todo.title}</div>
+                        <div className="font-medium text-gray-800 flex items-center">
+                          {todo.title}
+                          {todo.customSettings && (
+                            <span className="ml-2 text-purple-500" title="カスタムタイマー設定あり">
+                              <FaClock className="text-xs" />
+                            </span>
+                          )}
+                        </div>
                         <div className="text-sm text-gray-600">
                           見積もり: {todo.estimatedPomodoros} ポモドーロ
                           {todo.actualPomodoros > 0 && (
                             <span className="ml-2 text-green-600">
                               完了: {todo.actualPomodoros}
+                            </span>
+                          )}
+                          {todo.customSettings && (
+                            <span className="ml-2 text-purple-600 text-xs">
+                              🕐 {todo.customSettings.pomodoroMinutes || 25}分設定
                             </span>
                           )}
                         </div>
@@ -199,6 +258,17 @@ const TodoList: React.FC = () => {
                         {activeTodoId === todo.id ? <FaStop /> : <FaPlay />}
                       </button>
                       <button
+                        onClick={() => handleShowCustomSettings(todo)}
+                        className={`p-2 rounded transition-colors ${
+                          todo.customSettings
+                            ? 'bg-purple-100 text-purple-600 hover:bg-purple-200'
+                            : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                        }`}
+                        title="タイマー設定"
+                      >
+                        <FaClock />
+                      </button>
+                      <button
                         onClick={() => handleStartEdit(todo)}
                         className="p-2 bg-blue-100 text-blue-600 rounded hover:bg-blue-200 transition-colors"
                         title="編集"
@@ -211,6 +281,108 @@ const TodoList: React.FC = () => {
                         title="削除"
                       >
                         <FaTrash />
+                      </button>
+                    </div>
+                  </div>
+                )}
+                
+                {/* Custom Timer Settings Panel */}
+                {showCustomSettings === todo.id && (
+                  <div className="mt-4 p-4 bg-purple-50 border border-purple-200 rounded-lg">
+                    <div className="flex items-center justify-between mb-3">
+                      <h4 className="text-sm font-semibold text-purple-800 flex items-center">
+                        <FaClock className="mr-2" />
+                        このタスク専用のタイマー設定
+                      </h4>
+                      <button
+                        onClick={() => setShowCustomSettings(null)}
+                        className="text-gray-400 hover:text-gray-600"
+                      >
+                        <FaTimes />
+                      </button>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                      <div>
+                        <label className="block text-xs font-medium text-gray-700 mb-1">
+                          ポモドーロ時間（分）
+                        </label>
+                        <input
+                          type="number"
+                          min="1"
+                          max="60"
+                          value={customPomodoro}
+                          onChange={(e) => setCustomPomodoro(parseInt(e.target.value))}
+                          className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-medium text-gray-700 mb-1">
+                          短い休憩（分）
+                        </label>
+                        <input
+                          type="number"
+                          min="1"
+                          max="30"
+                          value={customShortBreak}
+                          onChange={(e) => setCustomShortBreak(parseInt(e.target.value))}
+                          className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-medium text-gray-700 mb-1">
+                          長い休憩（分）
+                        </label>
+                        <input
+                          type="number"
+                          min="1"
+                          max="60"
+                          value={customLongBreak}
+                          onChange={(e) => setCustomLongBreak(parseInt(e.target.value))}
+                          className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none"
+                        />
+                      </div>
+                    </div>
+                    
+                    <div className="space-y-2 mb-4">
+                      <label className="flex items-center text-sm text-gray-700">
+                        <input
+                          type="checkbox"
+                          checked={customAutoStartBreak}
+                          onChange={(e) => setCustomAutoStartBreak(e.target.checked)}
+                          className="mr-2 text-purple-600 bg-gray-100 border-gray-300 rounded focus:ring-purple-500"
+                        />
+                        休憩を自動開始
+                      </label>
+                      <label className="flex items-center text-sm text-gray-700">
+                        <input
+                          type="checkbox"
+                          checked={customAutoStartPomodoro}
+                          onChange={(e) => setCustomAutoStartPomodoro(e.target.checked)}
+                          className="mr-2 text-purple-600 bg-gray-100 border-gray-300 rounded focus:ring-purple-500"
+                        />
+                        ポモドーロを自動開始
+                      </label>
+                    </div>
+                    
+                    <div className="flex space-x-2">
+                      <button
+                        onClick={() => handleSaveCustomSettings(todo.id)}
+                        className="px-3 py-1 text-sm bg-purple-500 text-white rounded hover:bg-purple-600 transition-colors"
+                      >
+                        保存
+                      </button>
+                      <button
+                        onClick={() => handleClearCustomSettings(todo.id)}
+                        className="px-3 py-1 text-sm bg-gray-500 text-white rounded hover:bg-gray-600 transition-colors"
+                      >
+                        デフォルトに戻す
+                      </button>
+                      <button
+                        onClick={() => setShowCustomSettings(null)}
+                        className="px-3 py-1 text-sm bg-gray-300 text-gray-700 rounded hover:bg-gray-400 transition-colors"
+                      >
+                        キャンセル
                       </button>
                     </div>
                   </div>
