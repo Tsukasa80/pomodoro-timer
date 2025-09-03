@@ -28,6 +28,7 @@ interface AppStore extends AppState {
   deleteTodo: (id: string) => void;
   toggleTodoComplete: (id: string) => void;
   setActiveTodo: (id: string | null) => void;
+  startPomodoroForTask: (todoId: string) => void;
   
   // Report Actions
   addSession: (session: PomodoroSession) => void;
@@ -266,6 +267,33 @@ export const useAppStore = create<AppStore>()(
       
       setActiveTodo: (id) => {
         set({ activeTodoId: id });
+      },
+
+      startPomodoroForTask: (todoId) => {
+        const state = get();
+        const todo = state.todos.find(t => t.id === todoId);
+        
+        if (todo) {
+          // Set the task as active
+          set({ activeTodoId: todoId });
+          
+          // Apply custom task settings if they exist
+          if (todo.customSettings) {
+            const newSettings = {
+              ...state.settings,
+              ...(todo.customSettings.pomodoroMinutes && { pomodoro: todo.customSettings.pomodoroMinutes }),
+              ...(todo.customSettings.shortBreakMinutes && { shortBreak: todo.customSettings.shortBreakMinutes }),
+              ...(todo.customSettings.longBreakMinutes && { longBreak: todo.customSettings.longBreakMinutes }),
+              ...(todo.customSettings.autoStartBreak !== undefined && { autoStartBreak: todo.customSettings.autoStartBreak }),
+              ...(todo.customSettings.autoStartPomodoro !== undefined && { autoStartPomodoro: todo.customSettings.autoStartPomodoro }),
+            };
+            get().updateSettings(newSettings);
+          }
+          
+          // Start pomodoro mode
+          get().setMode('pomodoro');
+          get().startTimer();
+        }
       },
       
       // Report Actions

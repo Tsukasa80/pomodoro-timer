@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { FaPlus, FaTrash, FaEdit, FaCheck, FaTimes, FaPlay } from 'react-icons/fa';
+import { FaPlus, FaTrash, FaEdit, FaCheck, FaTimes, FaPlay, FaStop } from 'react-icons/fa';
 import { useAppStore } from '../store';
 import type { Todo } from '../types';
 
@@ -12,6 +12,7 @@ const TodoList: React.FC = () => {
     deleteTodo,
     toggleTodoComplete,
     setActiveTodo,
+    startPomodoroForTask,
   } = useAppStore();
 
   const [newTodoTitle, setNewTodoTitle] = useState('');
@@ -54,7 +55,13 @@ const TodoList: React.FC = () => {
   };
 
   const handleToggleActive = (todoId: string) => {
-    setActiveTodo(activeTodoId === todoId ? null : todoId);
+    if (activeTodoId === todoId) {
+      // Deactivate the current task
+      setActiveTodo(null);
+    } else {
+      // Start pomodoro for the selected task
+      startPomodoroForTask(todoId);
+    }
   };
 
   const activeTodos = todos.filter(todo => !todo.completed);
@@ -181,12 +188,15 @@ const TodoList: React.FC = () => {
                         onClick={() => handleToggleActive(todo.id)}
                         className={`p-2 rounded transition-colors ${
                           activeTodoId === todo.id
-                            ? 'bg-red-500 text-white'
-                            : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                            ? 'bg-red-500 text-white hover:bg-red-600'
+                            : 'bg-green-100 text-green-600 hover:bg-green-200'
                         }`}
-                        title={activeTodoId === todo.id ? 'アクティブ解除' : 'アクティブに設定'}
+                        title={activeTodoId === todo.id 
+                          ? 'ポモドーロを停止' 
+                          : 'このタスクでポモドーロを開始'
+                        }
                       >
-                        <FaPlay />
+                        {activeTodoId === todo.id ? <FaStop /> : <FaPlay />}
                       </button>
                       <button
                         onClick={() => handleStartEdit(todo)}

@@ -23,6 +23,14 @@ export interface Todo {
   actualPomodoros: number;
   createdAt: Date;
   completedAt?: Date;
+  // Task-specific timer settings
+  customSettings?: {
+    pomodoroMinutes?: number;
+    shortBreakMinutes?: number;
+    longBreakMinutes?: number;
+    autoStartBreak?: boolean;
+    autoStartPomodoro?: boolean;
+  };
 }
 
 export interface PomodoroSession {
