@@ -4,6 +4,11 @@ import react from '@vitejs/plugin-react'
 export default defineConfig({
   plugins: [react()],
   base: '/pomodoro-timer/',
+  build: {
+    outDir: 'dist',
+    assetsDir: 'assets',
+    emptyOutDir: true,
+  },
   server: {
     host: true, // ネットワークアクセスを許可
     port: 5173,

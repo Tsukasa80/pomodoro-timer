@@ -15,7 +15,8 @@
       "Bash(npx typescript:*)",
       "Bash(npx vite:*)",
       "Bash(npm install:*)",
-      "Bash(npm run check-deploy:*)"
+      "Bash(npm run check-deploy:*)",
+      "Bash(cat:*)"
     ],
     "deny": [],
     "ask": []
