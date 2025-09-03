@@ -8,6 +8,7 @@
     "build": "tsc && vite build",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
+    "check-dev": "node scripts/check-dev.js",
     "check-deploy": "node scripts/check-deploy.js",
     "deploy": "npm run build && npm run prepare-deploy && npm run check-deploy",
     "prepare-deploy": "cp -r dist/* . && mkdir -p assets && cp -r dist/assets/* assets/ && cp index.html 404.html"

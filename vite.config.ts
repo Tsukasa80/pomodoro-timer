@@ -1,9 +1,9 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
-export default defineConfig({
+export default defineConfig(({ command }) => ({
   plugins: [react()],
-  base: '/pomodoro-timer/',
+  base: command === 'build' ? '/pomodoro-timer/' : '/',
   build: {
     outDir: 'dist',
     assetsDir: 'assets',
@@ -13,4 +13,4 @@ export default defineConfig({
     host: true, // ネットワークアクセスを許可
     port: 5173,
   },
-})
+}))

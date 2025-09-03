@@ -7,6 +7,28 @@ NEVER create files unless they're absolutely necessary for achieving your goal.
 ALWAYS prefer editing an existing file to creating a new one.
 NEVER proactively create documentation files (*.md) or README files. Only create documentation files if explicitly requested by the User.
 
+# 開発・デプロイガイド
+
+## 🔍 開発前チェック
+
+開発サーバー起動前に必ず実行してください：
+
+```bash
+npm run check-dev
+```
+
+このコマンドで以下を自動確認：
+- ✅ Vite設定のbase設定（開発・本番環境の整合性）
+- ✅ index.htmlのスクリプト参照（相対パス/絶対パスの確認）
+- ✅ プロジェクト構造の確認
+- ✅ 開発環境の設定確認
+
+**よくある開発時の問題と解決法：**
+- 🚨 **白い画面になる場合**: パス設定の不整合が原因です
+- 💡 **解決方法**: `npm run check-dev` で問題を特定し、指示に従って修正
+
+---
+
 # GitHub Pagesデプロイガイド
 
 ## 🚀 安全なデプロイ手順
