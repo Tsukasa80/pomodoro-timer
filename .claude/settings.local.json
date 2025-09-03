@@ -16,7 +16,9 @@
       "Bash(npx vite:*)",
       "Bash(npm install:*)",
       "Bash(npm run check-deploy:*)",
-      "Bash(cat:*)"
+      "Bash(cat:*)",
+      "Bash(npm run check-dev:*)",
+      "Bash(npm run deploy:*)"
     ],
     "deny": [],
     "ask": []
