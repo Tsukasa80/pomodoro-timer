@@ -63,3 +63,12 @@ export const updateDocumentTitle = (mode: TimerMode, timeLeft: number): void => 
   const modeLabel = getTimerModeLabel(mode);
   document.title = `${timeString} - ${modeLabel}`;
 };
+
+// Export notification functions
+export {
+  requestNotificationPermission,
+  sendBrowserNotification,
+  playNotificationSound,
+  triggerVibration,
+  triggerAllNotifications
+} from './notifications';

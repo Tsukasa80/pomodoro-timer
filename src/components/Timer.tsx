@@ -16,6 +16,7 @@ const Timer: React.FC = () => {
     tick,
     setMode,
     toggleSettings,
+    requestNotificationPermission,
   } = useAppStore();
 
   useEffect(() => {
@@ -33,6 +34,13 @@ const Timer: React.FC = () => {
       }
     };
   }, [isRunning, tick]);
+
+  // Request notification permission on component mount
+  useEffect(() => {
+    if (settings.enableBrowserNotification) {
+      requestNotificationPermission();
+    }
+  }, [settings.enableBrowserNotification, requestNotificationPermission]);
 
   const handleModeChange = (mode: typeof currentMode) => {
     setMode(mode);

@@ -4,7 +4,9 @@ import type { AppState, TimerMode, Todo, PomodoroSession, DailyReport } from '..
 import { 
   generateId, 
   formatDate, 
-  updateDocumentTitle 
+  updateDocumentTitle,
+  triggerAllNotifications,
+  requestNotificationPermission
 } from '../utils';
 
 interface AppStore extends AppState {
@@ -36,6 +38,9 @@ interface AppStore extends AppState {
   // Utility Actions
   loadPersistedData: () => void;
   savePersistedData: () => void;
+  
+  // Notification Actions
+  requestNotificationPermission: () => Promise<void>;
 }
 
 const defaultSettings = {
@@ -46,6 +51,11 @@ const defaultSettings = {
   autoStartPomodoro: true,
   longBreakInterval: 2, // 2 pomodoros for testing
   enableLongBreak: true,
+  // Notification settings
+  enableSound: true,
+  enableVibration: true,
+  enableBrowserNotification: true,
+  soundVolume: 80,
 };
 
 export const useAppStore = create<AppStore>()(
@@ -140,6 +150,14 @@ export const useAppStore = create<AppStore>()(
         };
         
         get().addSession(session);
+        
+        // Trigger notifications
+        triggerAllNotifications(state.currentMode, {
+          enableSound: state.settings.enableSound,
+          enableVibration: state.settings.enableVibration,
+          enableBrowserNotification: state.settings.enableBrowserNotification,
+          soundVolume: state.settings.soundVolume
+        });
         
         let shouldAutoStart = false;
         
@@ -292,6 +310,11 @@ export const useAppStore = create<AppStore>()(
       
       savePersistedData: () => {
         // This will be handled by zustand persist middleware
+      },
+      
+      // Notification Actions
+      requestNotificationPermission: async () => {
+        await requestNotificationPermission();
       },
     }),
     {

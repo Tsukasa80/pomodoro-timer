@@ -8,6 +8,11 @@ export interface TimerSettings {
   autoStartPomodoro: boolean;
   longBreakInterval: number; // after how many pomodoros
   enableLongBreak: boolean; // whether to use long breaks
+  // Notification settings
+  enableSound: boolean;
+  enableVibration: boolean;
+  enableBrowserNotification: boolean;
+  soundVolume: number; // 0-100
 }
 
 export interface Todo {

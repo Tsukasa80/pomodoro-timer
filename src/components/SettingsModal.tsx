@@ -206,6 +206,90 @@ const SettingsModal: React.FC = () => {
             </div>
           </div>
 
+          {/* Notification Settings */}
+          <div className="space-y-4">
+            <h3 className="text-lg font-semibold text-gray-700 border-b border-gray-200 pb-2">
+              通知設定
+            </h3>
+            
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <div>
+                  <div className="font-medium text-gray-700">音声通知</div>
+                  <div className="text-sm text-gray-500">
+                    タイマー完了時にビープ音で知らせます
+                  </div>
+                </div>
+                <label className="relative inline-flex items-center cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={formData.enableSound}
+                    onChange={(e) => handleInputChange('enableSound', e.target.checked)}
+                    className="sr-only peer"
+                  />
+                  <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-yellow-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-yellow-600"></div>
+                </label>
+              </div>
+
+              {formData.enableSound && (
+                <div className="ml-4 space-y-2">
+                  <label className="block text-sm font-medium text-gray-700">
+                    音量
+                  </label>
+                  <div className="flex items-center space-x-3">
+                    <input
+                      type="range"
+                      min="0"
+                      max="100"
+                      value={formData.soundVolume}
+                      onChange={(e) => handleInputChange('soundVolume', parseInt(e.target.value))}
+                      className="flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
+                    />
+                    <span className="text-sm text-gray-600 w-12 text-right">
+                      {formData.soundVolume}%
+                    </span>
+                  </div>
+                </div>
+              )}
+
+              <div className="flex items-center justify-between">
+                <div>
+                  <div className="font-medium text-gray-700">バイブレーション</div>
+                  <div className="text-sm text-gray-500">
+                    モバイルデバイスで振動します（対応端末のみ）
+                  </div>
+                </div>
+                <label className="relative inline-flex items-center cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={formData.enableVibration}
+                    onChange={(e) => handleInputChange('enableVibration', e.target.checked)}
+                    className="sr-only peer"
+                  />
+                  <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-purple-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div>
+                </label>
+              </div>
+
+              <div className="flex items-center justify-between">
+                <div>
+                  <div className="font-medium text-gray-700">ブラウザ通知</div>
+                  <div className="text-sm text-gray-500">
+                    デスクトップに通知を表示します
+                  </div>
+                </div>
+                <label className="relative inline-flex items-center cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={formData.enableBrowserNotification}
+                    onChange={(e) => handleInputChange('enableBrowserNotification', e.target.checked)}
+                    className="sr-only peer"
+                  />
+                  <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+                </label>
+              </div>
+            </div>
+          </div>
+
           {/* Preview */}
           <div className="bg-gray-50 rounded-lg p-4">
             <h4 className="font-medium text-gray-700 mb-2">設定プレビュー</h4>
@@ -222,6 +306,14 @@ const SettingsModal: React.FC = () => {
                 {formData.autoStartBreak && formData.autoStartPomodoro ? ' 完全自動' :
                  formData.autoStartBreak ? ' 休憩のみ' :
                  formData.autoStartPomodoro ? ' ポモドーロのみ' : ' 無効'}
+              </div>
+              <div>
+                • 通知: 
+                {[
+                  formData.enableSound && '音声',
+                  formData.enableVibration && 'バイブ',
+                  formData.enableBrowserNotification && 'ブラウザ'
+                ].filter(Boolean).join('・') || '無効'}
               </div>
             </div>
           </div>
