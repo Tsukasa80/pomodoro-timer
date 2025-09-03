@@ -1,12 +1,34 @@
+import { useEffect } from 'react';
 import { FaChartLine, FaClock } from 'react-icons/fa';
 import { useAppStore } from './store';
 import Timer from './components/Timer';
 import TodoList from './components/TodoList';
 import SettingsModal from './components/SettingsModal';
 import ReportView from './components/ReportView';
+import { enableVibrationOnUserAction } from './utils/notifications';
 
 function App() {
   const { currentView, setCurrentView } = useAppStore();
+
+  // アプリ初期化時にユーザーアクションでバイブレーションAPIを活性化
+  useEffect(() => {
+    const handleFirstUserAction = () => {
+      enableVibrationOnUserAction();
+      console.log('👆 初回ユーザーアクションでバイブレーションAPI活性化');
+      
+      // 一度実行したら削除
+      document.removeEventListener('click', handleFirstUserAction);
+      document.removeEventListener('touch', handleFirstUserAction);
+    };
+
+    document.addEventListener('click', handleFirstUserAction);
+    document.addEventListener('touchstart', handleFirstUserAction);
+
+    return () => {
+      document.removeEventListener('click', handleFirstUserAction);
+      document.removeEventListener('touchstart', handleFirstUserAction);
+    };
+  }, []);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-red-50 via-orange-50 to-yellow-50">

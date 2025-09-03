@@ -20,7 +20,7 @@ const Timer: React.FC = () => {
   } = useAppStore();
 
   useEffect(() => {
-    let interval: number;
+    let interval: NodeJS.Timeout | undefined;
     
     if (isRunning) {
       interval = setInterval(() => {

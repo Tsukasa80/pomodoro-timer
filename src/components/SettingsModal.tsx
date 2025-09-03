@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { FaTimes, FaSave } from 'react-icons/fa';
 import { useAppStore } from '../store';
-import { triggerVibration, playNotificationSound } from '../utils/notifications';
+import { triggerVibration, playNotificationSound, getVibrationSupport, forceVibrationOnMobile, enableVibrationOnUserAction } from '../utils/notifications';
 
 const SettingsModal: React.FC = () => {
   const {
@@ -35,10 +35,55 @@ const SettingsModal: React.FC = () => {
   };
 
   const handleTestVibration = () => {
-    const result = triggerVibration();
-    if (!result) {
-      alert('このデバイスではバイブレーションが利用できません。\n\n可能な原因：\n• デバイスがバイブレーションに対応していない\n• HTTPS接続が必要\n• ブラウザがサポートしていない（例：iOS Safari）');
+    console.log('🧪 バイブレーションテスト開始');
+    
+    // APIを活性化
+    enableVibrationOnUserAction();
+    
+    const support = getVibrationSupport();
+    
+    // 通常のテスト
+    const normalResult = triggerVibration(true);
+    
+    // スマホ向け強制テスト
+    const forceResult = support.isMobile ? forceVibrationOnMobile() : false;
+    
+    let message = 'バイブレーションテスト結果:\n\n';
+    message += `• 通常テスト: ${normalResult ? '成功' : '失敗'}\n`;
+    if (support.isMobile) {
+      message += `• 強制テスト: ${forceResult ? '成功' : '失敗'}\n`;
     }
+    message += `• Vibrate API: ${support.hasVibrate ? '対応' : '非対応'}\n`;
+    message += `• HTTPS: ${support.isHttps ? 'OK' : 'NG'}\n`;
+    message += `• モバイル: ${support.isMobile ? 'Yes' : 'No'}\n`;
+    message += `• Android: ${support.isAndroid ? 'Yes' : 'No'}\n`;
+    message += `• iOS: ${support.isIOS ? 'Yes' : 'No'}\n`;
+    message += `• Chrome: ${support.isChrome ? 'Yes' : 'No'}\n`;
+    message += `• Safari: ${support.isSafari ? 'Yes' : 'No'}\n\n`;
+    
+    const anySuccess = normalResult || forceResult;
+    
+    if (!anySuccess) {
+      message += '💡 解決方法:\n';
+      if (support.isIOS) {
+        message += '• iOSはバイブレーション未対応\n';
+        message += '• 音での通知をご利用ください\n';
+      } else if (!support.hasVibrate) {
+        message += '• このブラウザ/デバイスは未対応\n';
+      } else {
+        message += '• Chrome設定: chrome://settings/content/notifications\n';
+        message += '• 端末設定でバイブレーション許可を確認\n';
+        message += '• 省電力モードを無効にしてください\n';
+        message += '• コンソール(F12)でエラー確認\n';
+      }
+    } else {
+      message += '✅ バイブレーションが動作しました！';
+      if (forceResult && !normalResult) {
+        message += '\n（強制パターンで成功）';
+      }
+    }
+    
+    alert(message);
   };
 
   const handleTestSound = () => {
