@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+import { persist, createJSONStorage } from 'zustand/middleware';
 import type { AppState, TimerMode, Todo, PomodoroSession, DailyReport } from '../types';
 import { 
   generateId, 
@@ -347,6 +347,7 @@ export const useAppStore = create<AppStore>()(
     }),
     {
       name: 'pomodoro-app-storage',
+      storage: createJSONStorage(() => localStorage),
       partialize: (state) => ({
         settings: state.settings,
         todos: state.todos,
