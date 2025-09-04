@@ -19,7 +19,10 @@
       "Bash(cat:*)",
       "Bash(npm run check-dev:*)",
       "Bash(npm run deploy:*)",
-      "Bash(gh repo create:*)"
+      "Bash(gh repo create:*)",
+      "Bash(git remote set-url:*)",
+      "Bash(git branch:*)",
+      "Bash(git pull:*)"
     ],
     "deny": [],
     "ask": []
