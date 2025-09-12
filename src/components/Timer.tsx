@@ -21,6 +21,7 @@ const Timer: React.FC = () => {
     pauseTimer,
     resetTimer,
     tick,
+    setTimeLeft,
     setMode,
     toggleSettings,
     requestNotificationPermission,
@@ -29,6 +30,18 @@ const Timer: React.FC = () => {
   const backgroundTimerRef = useRef<BackgroundTimer>(new BackgroundTimer());
   const isTabVisibleRef = useRef(true);
   const wakeLockSupportedRef = useRef(false);
+  
+  // デバッグログ用state (開発環境でのみ表示)
+  const [debugLogs, setDebugLogs] = React.useState<string[]>([]);
+  
+  const addDebugLog = (message: string) => {
+    if (process.env.NODE_ENV === 'development') {
+      setDebugLogs(prev => {
+        const newLogs = [...prev, `${new Date().toLocaleTimeString()}: ${message}`];
+        return newLogs.slice(-5); // 最新5件のみ保持
+      });
+    }
+  };
 
   useEffect(() => {
     let interval: NodeJS.Timeout | undefined;
@@ -76,22 +89,29 @@ const Timer: React.FC = () => {
       
       if (hidden && isRunning) {
         console.log('📱 タブが非アクティブ - バックグラウンドタイマー継続');
+        addDebugLog('📱 バックグラウンド開始');
         // バックグラウンドタイマーで継続管理
         backgroundTimerRef.current.start(timeLeft * 1000);
       } else if (!hidden && isRunning) {
         console.log('📱 タブがアクティブに復帰');
+        addDebugLog('📱 フォアグラウンド復帰');
+        
         // バックグラウンドタイマーから正確な残り時間を取得
-        const actualTimeLeft = Math.ceil(backgroundTimerRef.current.getRemainingTime() / 1000);
+        const actualTimeLeft = Math.max(0, Math.ceil(backgroundTimerRef.current.getRemainingTime() / 1000));
+        
+        console.log(`🔍 現在時間: ${timeLeft}秒, 実際時間: ${actualTimeLeft}秒`);
+        
         if (actualTimeLeft !== timeLeft) {
           console.log(`⏰ 時間補正: ${timeLeft}秒 → ${actualTimeLeft}秒`);
-          // ここでstoreのtimeLeftを更新する必要がありますが、
-          // Timerコンポーネントからは直接更新できないため、
-          // 実装が必要な場合は別途対応
+          addDebugLog(`⏰ 時間補正: ${timeLeft}→${actualTimeLeft}秒`);
+          setTimeLeft(actualTimeLeft); // ストアの時間を正確な値に更新
         }
         
-        // バックグラウンドタイマーが完了していたら通知
-        if (backgroundTimerRef.current.isComplete()) {
-          tick(); // セッション完了処理をトリガー
+        // バックグラウンドタイマーが完了していて、まだセッションが継続中の場合
+        if (backgroundTimerRef.current.isComplete() && actualTimeLeft === 0 && isRunning) {
+          console.log('🎯 バックグラウンドでセッション完了を検出 - completeSession実行');
+          addDebugLog('🎯 セッション完了検出');
+          setTimeLeft(0); // 確実に0に設定してcompleteSessionをトリガー
         }
       }
     });
@@ -235,6 +255,22 @@ const Timer: React.FC = () => {
           <div className="text-gray-500 mt-1">
             Wake Lock: {wakeLockSupportedRef.current ? '✅ 対応' : '❌ 非対応'} |
             タブ状態: {isTabVisibleRef.current ? '👁️ アクティブ' : '🙈 非アクティブ'}
+          </div>
+        </div>
+      )}
+      
+      {/* Debug Logs */}
+      {process.env.NODE_ENV === 'development' && debugLogs.length > 0 && (
+        <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+          <div className="text-yellow-800 font-semibold text-xs mb-2">
+            🐛 デバッグログ (最新5件):
+          </div>
+          <div className="space-y-1">
+            {debugLogs.map((log, index) => (
+              <div key={index} className="text-yellow-700 text-xs font-mono">
+                {log}
+              </div>
+            ))}
           </div>
         </div>
       )}

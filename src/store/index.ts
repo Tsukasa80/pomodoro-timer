@@ -16,6 +16,7 @@ interface AppStore extends AppState {
   pauseTimer: () => void;
   resetTimer: () => void;
   tick: () => void;
+  setTimeLeft: (timeLeft: number) => void;
   completeSession: () => void;
   
   // Settings Actions
@@ -127,6 +128,17 @@ export const useAppStore = create<AppStore>()(
           if (newTimeLeft === 0) {
             get().completeSession();
           }
+        }
+      },
+      
+      setTimeLeft: (timeLeft: number) => {
+        set({ timeLeft });
+        const state = get();
+        updateDocumentTitle(state.currentMode, timeLeft);
+        
+        // タイマー終了時は自動的にcompleteSessionを呼ぶ
+        if (timeLeft === 0 && state.isRunning) {
+          get().completeSession();
         }
       },
       
