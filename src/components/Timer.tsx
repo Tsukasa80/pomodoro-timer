@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { FaPlay, FaPause, FaRedo, FaCog } from 'react-icons/fa';
 import { useAppStore } from '../store';
-import { formatTime, getTimerModeLabel, getTimerModeColor } from '../utils';
+import { formatTime, getTimerModeLabel } from '../utils';
 import { 
   requestWakeLock, 
   releaseWakeLock, 
@@ -160,133 +160,152 @@ const Timer: React.FC = () => {
   ];
 
   return (
-    <div className="bg-white rounded-lg shadow-lg p-8 max-w-md mx-auto">
-      {/* Header */}
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-gray-800">ポモドーロタイマー</h1>
-        <button
-          onClick={toggleSettings}
-          className="p-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-full transition-colors"
-          aria-label="設定を開く"
-        >
-          <FaCog size={20} />
-        </button>
-      </div>
-
-      {/* Mode Selection */}
-      <div className="flex mb-8">
-        {modeButtons.map(({ mode, label }) => (
-          <button
-            key={mode}
-            onClick={() => handleModeChange(mode)}
-            className={`flex-1 py-3 px-4 text-sm font-medium rounded-lg mr-2 last:mr-0 transition-colors ${
-              currentMode === mode
-                ? `${getTimerModeColor(mode)} text-white`
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-            }`}
-            disabled={isRunning}
-          >
-            {label}
-          </button>
-        ))}
-      </div>
-
-      {/* Timer Display */}
-      <div className="text-center mb-8">
-        <div 
-          className={`text-6xl font-mono font-bold mb-4 ${
-            currentMode === 'pomodoro' 
-              ? 'text-red-500' 
-              : currentMode === 'short-break'
-              ? 'text-green-500'
-              : 'text-blue-500'
-          }`}
-        >
-          {formatTime(timeLeft)}
-        </div>
-        <div className="text-lg text-gray-600 mb-2">
-          {getTimerModeLabel(currentMode)}
-        </div>
-        {currentMode === 'pomodoro' && (
-          <div className="text-sm text-gray-500">
-            完了: {completedPomodoros} ポモドーロ
-          </div>
-        )}
-      </div>
-
-      {/* Timer Controls */}
-      <div className="flex justify-center space-x-4">
-        <button
-          onClick={handlePlayPause}
-          className={`px-8 py-4 rounded-full text-white font-semibold text-lg shadow-lg transition-all transform hover:scale-105 ${
-            isRunning
-              ? 'bg-orange-500 hover:bg-orange-600'
-              : `${getTimerModeColor(currentMode)} hover:opacity-90`
-          }`}
-        >
-          {isRunning ? (
-            <>
-              <FaPause className="inline mr-2" />
-              一時停止
-            </>
-          ) : (
-            <>
-              <FaPlay className="inline mr-2" />
-              開始
-            </>
-          )}
-        </button>
+    <div className="relative">
+      {/* Background Gradient Card */}
+      <div className={`relative bg-gradient-to-br ${
+        currentMode === 'pomodoro' 
+          ? 'from-red-400 via-red-500 to-red-600' 
+          : currentMode === 'short-break'
+          ? 'from-green-400 via-green-500 to-green-600'
+          : 'from-blue-400 via-blue-500 to-blue-600'
+      } rounded-3xl p-8 max-w-md mx-auto shadow-2xl transform transition-all duration-500`}>
         
-        <button
-          onClick={resetTimer}
-          className="px-6 py-4 rounded-full bg-gray-500 text-white font-semibold shadow-lg transition-all transform hover:scale-105 hover:bg-gray-600"
-        >
-          <FaRedo className="inline mr-2" />
-          リセット
-        </button>
+        {/* Decorative Elements */}
+        <div className="absolute top-4 right-4 w-20 h-20 bg-white bg-opacity-10 rounded-full blur-xl"></div>
+        <div className="absolute bottom-4 left-4 w-16 h-16 bg-white bg-opacity-10 rounded-full blur-lg"></div>
+        
+        {/* Header */}
+        <div className="flex justify-between items-center mb-8 relative z-10">
+          <h1 className="text-2xl font-bold text-white drop-shadow-lg">ポモドーロタイマー</h1>
+          <button
+            onClick={toggleSettings}
+            className="p-3 text-white hover:text-white hover:bg-white hover:bg-opacity-20 rounded-full transition-all duration-300 backdrop-blur-sm"
+            aria-label="設定を開く"
+          >
+            <FaCog size={22} />
+          </button>
+        </div>
+
+        {/* Mode Selection */}
+        <div className="flex mb-10 space-x-2 relative z-10">
+          {modeButtons.map(({ mode, label }) => (
+            <button
+              key={mode}
+              onClick={() => handleModeChange(mode)}
+              className={`flex-1 py-3 px-4 text-sm font-medium rounded-xl transition-all duration-300 ${
+                currentMode === mode
+                  ? 'bg-white text-gray-800 shadow-lg transform scale-105'
+                  : 'bg-white bg-opacity-20 text-white hover:bg-opacity-30 backdrop-blur-sm'
+              }`}
+              disabled={isRunning}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+
+        {/* Timer Display */}
+        <div className="text-center mb-10 relative z-10">
+          <div className="relative">
+            {/* Timer Circle Background */}
+            <div className="w-64 h-64 mx-auto mb-6 relative">
+              <div className="absolute inset-0 bg-white bg-opacity-20 rounded-full backdrop-blur-sm"></div>
+              <div className="absolute inset-4 bg-white bg-opacity-10 rounded-full backdrop-blur-sm"></div>
+              <div className="absolute inset-8 bg-gradient-to-br from-white to-transparent opacity-30 rounded-full"></div>
+              
+              {/* Timer Text */}
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="text-center">
+                  <div className="text-5xl font-mono font-bold text-white drop-shadow-2xl mb-2">
+                    {formatTime(timeLeft)}
+                  </div>
+                  <div className="text-lg text-white text-opacity-90 font-medium">
+                    {getTimerModeLabel(currentMode)}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          {currentMode === 'pomodoro' && (
+            <div className="text-white text-opacity-80 font-medium">
+              🍅 完了: {completedPomodoros} ポモドーロ
+            </div>
+          )}
+        </div>
+
+        {/* Timer Controls */}
+        <div className="flex justify-center space-x-4 relative z-10">
+          <button
+            onClick={handlePlayPause}
+            className={`px-8 py-4 rounded-2xl text-gray-800 font-bold text-lg shadow-xl transition-all duration-300 transform hover:scale-110 ${
+              isRunning
+                ? 'bg-gradient-to-r from-yellow-300 to-orange-300 hover:from-yellow-400 hover:to-orange-400'
+                : 'bg-gradient-to-r from-white to-gray-100 hover:from-gray-100 hover:to-white'
+            } hover:shadow-2xl`}
+          >
+            {isRunning ? (
+              <>
+                <FaPause className="inline mr-2" />
+                一時停止
+              </>
+            ) : (
+              <>
+                <FaPlay className="inline mr-2" />
+                開始
+              </>
+            )}
+          </button>
+          
+          <button
+            onClick={resetTimer}
+            className="px-6 py-4 rounded-2xl bg-white bg-opacity-20 text-white font-semibold shadow-lg transition-all duration-300 transform hover:scale-110 hover:bg-opacity-30 backdrop-blur-sm hover:shadow-2xl"
+          >
+            <FaRedo className="inline mr-2" />
+            リセット
+          </button>
+        </div>
       </div>
 
       {/* Session Completion Indicator */}
       {timeLeft === 0 && (
-        <div className="mt-6 p-4 bg-green-100 border border-green-300 rounded-lg text-center">
-          <div className="text-green-800 font-semibold">
+        <div className="mt-6 p-6 bg-gradient-to-r from-green-400 to-green-500 border border-green-300 rounded-2xl text-center shadow-2xl transform animate-pulse">
+          <div className="text-white font-bold text-xl drop-shadow-lg">
             🎉 セッション完了！
           </div>
-          <div className="text-sm text-green-600 mt-1">
-            お疲れ様でした！
+          <div className="text-sm text-green-100 mt-2 font-medium">
+            お疲れ様でした！次のセッションも頑張りましょう✨
           </div>
         </div>
       )}
       
       {/* Mobile Support Status */}
       {process.env.NODE_ENV === 'development' && (
-        <div className="mt-4 p-3 bg-gray-50 border border-gray-200 rounded-lg text-xs">
-          <div className="text-gray-600">
+        <div className="mt-4 p-4 bg-gradient-to-r from-gray-50 to-blue-50 border border-gray-200 rounded-2xl text-xs shadow-lg">
+          <div className="text-gray-700 font-semibold mb-2">
             📱 スマホ対応状況:
           </div>
-          <div className="text-gray-500 mt-1">
-            Wake Lock: {wakeLockSupportedRef.current ? '✅ 対応' : '❌ 非対応'} |
-            タブ状態: {isTabVisibleRef.current ? '👁️ アクティブ' : '🙈 非アクティブ'}
-          </div>
-          <div className="text-gray-500 mt-1">
-            自動開始: {'ontouchstart' in window ? 
-              (window.sessionStorage.getItem('pomodoro-user-gesture') === 'true' ? 
-                '✅ 有効' : '⏳ ユーザーアクション待ち') : 
-              '✅ デスクトップ対応'} |
-            デバイス: {'ontouchstart' in window ? '📱 モバイル' : '💻 デスクトップ'}
+          <div className="text-gray-600 space-y-1">
+            <div>Wake Lock: {wakeLockSupportedRef.current ? '✅ 対応' : '❌ 非対応'} | タブ状態: {isTabVisibleRef.current ? '👁️ アクティブ' : '🙈 非アクティブ'}</div>
+            <div>
+              自動開始: {'ontouchstart' in window ? 
+                (window.sessionStorage.getItem('pomodoro-user-gesture') === 'true' ? 
+                  '✅ 有効' : '⏳ ユーザーアクション待ち') : 
+                '✅ デスクトップ対応'} | デバイス: {'ontouchstart' in window ? '📱 モバイル' : '💻 デスクトップ'}
+            </div>
           </div>
         </div>
       )}
       
       {/* Debug Logs (開発環境) */}
       {process.env.NODE_ENV === 'development' && debugLogs.length > 0 && (
-        <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-          <div className="text-yellow-800 font-semibold text-xs mb-2">
+        <div className="mt-4 p-4 bg-gradient-to-r from-yellow-50 to-orange-50 border border-yellow-200 rounded-2xl shadow-lg">
+          <div className="text-yellow-800 font-semibold text-xs mb-3">
             🐛 デバッグログ (最新5件):
           </div>
           <div className="space-y-1">
             {debugLogs.map((log, index) => (
-              <div key={index} className="text-yellow-700 text-xs font-mono">
+              <div key={index} className="text-yellow-700 text-xs font-mono bg-white bg-opacity-60 p-2 rounded">
                 {log}
               </div>
             ))}
@@ -297,30 +316,30 @@ const Timer: React.FC = () => {
       {/* Mobile Debug Logs (本番環境でも表示) */}
       {'ontouchstart' in window && mobileDebugLogs.length > 0 && (
         <div className="mt-4">
-          <div className="flex justify-between items-center mb-2">
+          <div className="flex justify-between items-center mb-3">
             <div className="text-blue-800 font-semibold text-sm">
               📱 デバッグ情報 (最新10件):
             </div>
             <div className="flex space-x-2">
               <button
                 onClick={() => setShowMobileDebug(!showMobileDebug)}
-                className="text-xs px-2 py-1 bg-blue-100 text-blue-700 rounded hover:bg-blue-200"
+                className="text-xs px-3 py-2 bg-gradient-to-r from-blue-100 to-blue-200 text-blue-700 rounded-xl hover:from-blue-200 hover:to-blue-300 transition-all duration-300 shadow-md"
               >
                 {showMobileDebug ? '非表示' : '表示'}
               </button>
               <button
                 onClick={clearMobileDebugLogs}
-                className="text-xs px-2 py-1 bg-red-100 text-red-700 rounded hover:bg-red-200"
+                className="text-xs px-3 py-2 bg-gradient-to-r from-red-100 to-red-200 text-red-700 rounded-xl hover:from-red-200 hover:to-red-300 transition-all duration-300 shadow-md"
               >
                 クリア
               </button>
             </div>
           </div>
           {showMobileDebug && (
-            <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg max-h-40 overflow-y-auto">
-              <div className="space-y-1">
+            <div className="p-4 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-2xl max-h-40 overflow-y-auto shadow-lg">
+              <div className="space-y-2">
                 {mobileDebugLogs.map((log, index) => (
-                  <div key={index} className="text-blue-800 text-xs font-mono break-words">
+                  <div key={index} className="text-blue-800 text-xs font-mono break-words bg-white bg-opacity-60 p-2 rounded">
                     {log}
                   </div>
                 ))}
