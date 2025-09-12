@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { FaTimes, FaSave, FaRedo } from 'react-icons/fa';
 import { useAppStore } from '../store';
-import { triggerVibration, playNotificationSound, getVibrationSupport, forceVibrationOnMobile, enableVibrationOnUserAction } from '../utils/notifications';
+import { triggerVibration, playNotificationSound, getVibrationSupport, forceVibrationOnMobile } from '../utils/notifications';
 
 const SettingsModal: React.FC = () => {
   const {
@@ -45,8 +45,9 @@ const SettingsModal: React.FC = () => {
   const handleTestVibration = () => {
     console.log('🧪 バイブレーションテスト開始');
     
-    // APIを活性化
-    enableVibrationOnUserAction();
+    // ユーザーアクションを記録
+    window.sessionStorage.setItem('pomodoro-user-gesture', 'true');
+    console.log('👆 テスト用ユーザーアクション記録');
     
     const support = getVibrationSupport();
     

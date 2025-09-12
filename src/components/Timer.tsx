@@ -6,8 +6,7 @@ import {
   requestWakeLock, 
   releaseWakeLock, 
   setupVisibilityChangeHandler, 
-  BackgroundTimer,
-  enableVibrationOnUserAction 
+  BackgroundTimer
 } from '../utils/notifications';
 import { addMobileDebugLog, subscribeMobileDebugLogs, clearMobileDebugLogs } from '../utils/mobileDebug';
 
@@ -123,8 +122,7 @@ const Timer: React.FC = () => {
       }
     });
     
-    // バイブレーション準備（ユーザーアクション時に有効化）
-    enableVibrationOnUserAction();
+    // バイブレーション準備はユーザーアクションで行う（handlePlayPause内で実行）
     
     // モバイル用デバッグログの購読
     const unsubscribeMobileDebugLogs = subscribeMobileDebugLogs((logs) => {
@@ -144,15 +142,9 @@ const Timer: React.FC = () => {
   };
 
   const handlePlayPause = () => {
-    // バイブレーションを有効化（ユーザーアクション）
-    enableVibrationOnUserAction();
-    
-    // スマホでの自動開始を有効化（ユーザージェスチャーが必要）
-    if ('ontouchstart' in window) {
-      console.log('📱 スマホユーザーアクション検出 - 自動開始機能を有効化');
-      // タッチデバイスでのユーザーアクションを記録
-      window.sessionStorage.setItem('pomodoro-user-gesture', 'true');
-    }
+    // ユーザーアクションを記録（バイブレーション呼び出しなし）
+    window.sessionStorage.setItem('pomodoro-user-gesture', 'true');
+    console.log('👆 ユーザーアクション記録 - バイブレーション機能を有効化');
     
     if (isRunning) {
       pauseTimer();
