@@ -213,9 +213,10 @@ export const useAppStore = create<AppStore>()(
             
             // モバイル・デスクトップ対応の自動開始
             const isMobile = 'ontouchstart' in window;
-            const delay = isMobile ? 500 : 100; // モバイルは長めの遅延
+            const delay = isMobile ? 200 : 50; // 遅延を短縮してより迅速な自動開始
             
-            setTimeout(() => {
+            // 即座に自動開始を試行（UIレスポンス向上）
+            const attemptAutoStart = () => {
               const currentState = get();
               const hasUserGesture = window.sessionStorage.getItem('pomodoro-user-gesture') === 'true';
               
@@ -238,15 +239,20 @@ export const useAppStore = create<AppStore>()(
                   // 初回のユーザーアクションがない場合のみスキップ
                 } else {
                   console.log('✅ 自動開始: 休憩タイマー開始', { isMobile, hasUserGesture, hasUserInteracted, completedPomodoros: currentState.completedPomodoros });
-                  // さらにrequestAnimationFrameで確実に実行
-                  requestAnimationFrame(() => {
-                    get().startTimer();
-                  });
+                  // 確実にタイマーを開始
+                  get().startTimer();
+                  return true; // 成功を示す
                 }
               } else {
                 console.log('⚠️ 自動開始条件が不一致');
               }
-            }, delay);
+              return false;
+            };
+            
+            // 即座に実行し、失敗したら遅延実行
+            if (!attemptAutoStart()) {
+              setTimeout(attemptAutoStart, delay);
+            }
           } else {
             console.log(`📱 休憩自動開始はOFF - 手動モードに設定: ${nextMode}`);
             get().setMode(nextMode);
@@ -264,9 +270,10 @@ export const useAppStore = create<AppStore>()(
             
             // モバイル・デスクトップ対応の自動開始
             const isMobile = 'ontouchstart' in window;
-            const delay = isMobile ? 500 : 100; // モバイルは長めの遅延
+            const delay = isMobile ? 200 : 50; // 遅延を短縮してより迅速な自動開始
             
-            setTimeout(() => {
+            // 即座に自動開始を試行（UIレスポンス向上）
+            const attemptPomodoroAutoStart = () => {
               const currentState = get();
               const hasUserGesture = window.sessionStorage.getItem('pomodoro-user-gesture') === 'true';
               
@@ -289,15 +296,20 @@ export const useAppStore = create<AppStore>()(
                   // 初回のユーザーアクションがない場合のみスキップ
                 } else {
                   console.log('✅ 自動開始: ポモドーロタイマー開始', { isMobile, hasUserGesture, hasUserInteracted, completedPomodoros: currentState.completedPomodoros });
-                  // さらにrequestAnimationFrameで確実に実行
-                  requestAnimationFrame(() => {
-                    get().startTimer();
-                  });
+                  // 確実にタイマーを開始
+                  get().startTimer();
+                  return true; // 成功を示す
                 }
               } else {
                 console.log('⚠️ ポモドーロ自動開始条件が不一致');
               }
-            }, delay);
+              return false;
+            };
+            
+            // 即座に実行し、失敗したら遅延実行
+            if (!attemptPomodoroAutoStart()) {
+              setTimeout(attemptPomodoroAutoStart, delay);
+            }
           } else {
             console.log('📱 ポモドーロ自動開始はOFF - 手動モードに設定');
             get().setMode('pomodoro');

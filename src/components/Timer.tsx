@@ -272,14 +272,32 @@ const Timer: React.FC = () => {
         </div>
       </div>
 
-      {/* Session Completion Indicator */}
-      {timeLeft === 0 && (
+      {/* Session Completion Indicator - 自動開始が無効の場合のみ表示 */}
+      {timeLeft === 0 && !isRunning && (
+        (currentMode === 'pomodoro' && !settings.autoStartBreak) ||
+        (currentMode !== 'pomodoro' && !settings.autoStartPomodoro)
+      ) && (
         <div className="mt-6 p-6 bg-gradient-to-r from-green-400 to-green-500 border border-green-300 rounded-2xl text-center shadow-2xl transform animate-pulse">
           <div className="text-white font-bold text-xl drop-shadow-lg">
             🎉 セッション完了！
           </div>
           <div className="text-sm text-green-100 mt-2 font-medium">
-            お疲れ様でした！次のセッションも頑張りましょう✨
+            お疲れ様でした！次のセッションを開始してください✨
+          </div>
+        </div>
+      )}
+      
+      {/* 自動開始中のインジケーター */}
+      {timeLeft === 0 && !isRunning && (
+        (currentMode === 'pomodoro' && settings.autoStartBreak) ||
+        (currentMode !== 'pomodoro' && settings.autoStartPomodoro)
+      ) && (
+        <div className="mt-6 p-6 bg-gradient-to-r from-blue-400 to-blue-500 border border-blue-300 rounded-2xl text-center shadow-2xl">
+          <div className="text-white font-bold text-xl drop-shadow-lg">
+            ⏳ 次のセッションを準備中...
+          </div>
+          <div className="text-sm text-blue-100 mt-2 font-medium">
+            自動開始まで少々お待ちください
           </div>
         </div>
       )}
