@@ -196,14 +196,16 @@ export const useAppStore = create<AppStore>()(
             console.log(`📱 休憩自動開始: ${nextMode}`);
             get().setMode(nextMode);
             
-            // スマホ対応: 少し遅延をかけて確実に開始
-            setTimeout(() => {
-              const currentState = get();
-              if (currentState.currentMode === nextMode && !currentState.isRunning) {
-                console.log('📱 遅延自動開始: 休憩タイマー開始');
-                get().startTimer();
-              }
-            }, 100);
+            // より確実な自動開始（本番環境対応）
+            requestAnimationFrame(() => {
+              requestAnimationFrame(() => {
+                const currentState = get();
+                if (currentState.currentMode === nextMode && !currentState.isRunning) {
+                  console.log('📱 自動開始: 休憩タイマー開始');
+                  get().startTimer();
+                }
+              });
+            });
           } else {
             get().setMode(nextMode);
           }
@@ -213,20 +215,22 @@ export const useAppStore = create<AppStore>()(
             console.log('📱 ポモドーロ自動開始');
             get().setMode('pomodoro');
             
-            // スマホ対応: 少し遅延をかけて確実に開始
-            setTimeout(() => {
-              const currentState = get();
-              if (currentState.currentMode === 'pomodoro' && !currentState.isRunning) {
-                console.log('📱 遅延自動開始: ポモドーロタイマー開始');
-                get().startTimer();
-              }
-            }, 100);
+            // より確実な自動開始（本番環境対応）
+            requestAnimationFrame(() => {
+              requestAnimationFrame(() => {
+                const currentState = get();
+                if (currentState.currentMode === 'pomodoro' && !currentState.isRunning) {
+                  console.log('📱 自動開始: ポモドーロタイマー開始');
+                  get().startTimer();
+                }
+              });
+            });
           } else {
             get().setMode('pomodoro');
           }
         }
         
-        // 遅延自動開始の場合は一旦停止
+        // 自動開始設定に関係なく一旦停止（requestAnimationFrameで再開）
         set({ isRunning: false });
       },
       
