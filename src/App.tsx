@@ -5,20 +5,20 @@ import Timer from './components/Timer';
 import TodoList from './components/TodoList';
 import SettingsModal from './components/SettingsModal';
 import ReportView from './components/ReportView';
-import { enableVibrationOnUserAction } from './utils/notifications';
 
 function App() {
   const { currentView, setCurrentView } = useAppStore();
 
-  // アプリ初期化時にユーザーアクションでバイブレーションAPIを活性化
+  // アプリ初期化時にユーザーアクションを記録
   useEffect(() => {
     const handleFirstUserAction = () => {
-      enableVibrationOnUserAction();
-      console.log('👆 初回ユーザーアクションでバイブレーションAPI活性化');
+      // セッションストレージにユーザーアクションを記録（バイブレーション呼び出しなし）
+      window.sessionStorage.setItem('pomodoro-user-gesture', 'true');
+      console.log('👆 初回ユーザーアクションを記録（バイブレーション活性化準備完了）');
       
       // 一度実行したら削除
       document.removeEventListener('click', handleFirstUserAction);
-      document.removeEventListener('touch', handleFirstUserAction);
+      document.removeEventListener('touchstart', handleFirstUserAction);
     };
 
     document.addEventListener('click', handleFirstUserAction);
