@@ -141,6 +141,14 @@ export const useAppStore = create<AppStore>()(
       tick: () => {
         const state = get();
         
+        // タイマーが0になったら即座に停止してcompleteSession実行
+        if (state.isRunning && state.timeLeft <= 0) {
+          get().addDebugInfo('タイマー終了！tick処理でcompleteSession呼び出し');
+          set({ isRunning: false }); // 先にタイマーを停止
+          get().completeSession();
+          return; // 処理終了
+        }
+        
         if (state.isRunning && state.timeLeft > 0) {
           const newTimeLeft = state.timeLeft - 1;
           set({ timeLeft: newTimeLeft });
@@ -152,13 +160,7 @@ export const useAppStore = create<AppStore>()(
           }
           
           if (newTimeLeft === 0) {
-            get().addDebugInfo('tick処理でcompleteSession呼び出し');
-            get().completeSession();
-          }
-        } else {
-          // 動かない理由をデバッグ
-          if (state.timeLeft <= 5) {
-            get().addDebugInfo(`tick: isRunning=${state.isRunning}, timeLeft=${state.timeLeft}`);
+            get().addDebugInfo('tick処理で次回completeSession実行予定');
           }
         }
       },
