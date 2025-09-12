@@ -45,12 +45,12 @@ interface AppStore extends AppState {
 }
 
 const defaultSettings = {
-  pomodoro: 1, // 1 minute for testing
-  shortBreak: 1, // 1 minute for testing  
-  longBreak: 2, // 2 minutes for testing
+  pomodoro: 25, // 25 minutes (standard pomodoro)
+  shortBreak: 5, // 5 minutes (standard short break)
+  longBreak: 15, // 15 minutes (standard long break)
   autoStartBreak: true,
   autoStartPomodoro: true,
-  longBreakInterval: 2, // 2 pomodoros for testing
+  longBreakInterval: 4, // 4 pomodoros (standard)
   enableLongBreak: true,
   // Notification settings
   enableSound: true,
@@ -132,6 +132,7 @@ export const useAppStore = create<AppStore>()(
       
       completeSession: () => {
         const state = get();
+        
         const session: PomodoroSession = {
           id: generateId(),
           mode: state.currentMode,
@@ -202,6 +203,7 @@ export const useAppStore = create<AppStore>()(
         if (!shouldAutoStart) {
           set({ isRunning: false });
         }
+      },
       },
       
       // Settings Actions
