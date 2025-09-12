@@ -10,7 +10,6 @@ export interface TimerSettings {
   enableLongBreak: boolean; // whether to use long breaks
   // Notification settings
   enableSound: boolean;
-  enableVibration: boolean;
   enableBrowserNotification: boolean;
   soundVolume: number; // 0-100
 }

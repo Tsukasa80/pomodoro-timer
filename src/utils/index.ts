@@ -69,6 +69,5 @@ export {
   requestNotificationPermission,
   sendBrowserNotification,
   playNotificationSound,
-  triggerVibration,
   triggerAllNotifications
 } from './notifications';

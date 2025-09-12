@@ -87,160 +87,19 @@ export const playNotificationSound = (volume: number = 80) => {
   }
 };
 
-// バイブレーション（ユーザージェスチャー確認付き）
-export const triggerVibration = (isUserGesture = false) => {
-  try {
-    // デバッグ情報を出力
-    console.log('🔍 バイブレーション実行開始');
-    console.log('📱 User Agent:', navigator.userAgent);
-    console.log('🌐 Protocol:', location.protocol);
-    console.log('🏠 Hostname:', location.hostname);
-    
-    // バイブレーション機能の確認
-    if (!('vibrate' in navigator)) {
-      console.log('❌ このデバイス/ブラウザはバイブレーションに対応していません');
-      return false;
-    }
-    console.log('✅ navigator.vibrateが存在します');
-
-    // HTTPSでない場合の警告
-    if (location.protocol !== 'https:' && location.hostname !== 'localhost') {
-      console.warn('⚠️ バイブレーション機能にはHTTPS接続が必要です');
-      return false;
-    }
-    console.log('✅ プロトコルチェック通過');
-    console.log('👆 ユーザージェスチャー:', isUserGesture ? 'あり' : 'なし');
-
-    // ユーザージェスチャーチェック - 厳格に実行
-    const hasUserInteracted = window.sessionStorage.getItem('pomodoro-user-gesture') === 'true';
-    console.log('🔍 ユーザー操作チェック:', { 
-      isUserGesture, 
-      hasUserInteracted, 
-      sessionValue: window.sessionStorage.getItem('pomodoro-user-gesture') 
-    });
-    
-    if (!isUserGesture && !hasUserInteracted) {
-      console.log('⚠️ ユーザージェスチャーなし - バイブレーションをスキップします');
-      console.log('💡 ヒント: 画面をクリック/タップするとバイブレーションが有効になります');
-      return false;
-    }
-    
-    console.log('✅ ユーザージェスチャー確認OK - バイブレーション実行を継続');
-
-    // Android Chromeの特別対応
-    const isAndroidChrome = /Android.*Chrome/i.test(navigator.userAgent);
-    const isPixel = /Pixel/i.test(navigator.userAgent);
-    
-    if (isAndroidChrome || isPixel) {
-      console.log('📱 Android Chrome/Pixel検出 - 特別パターンを使用');
-      // Android向け強めのパターン
-      try {
-        const result = navigator.vibrate([400, 150, 400, 150, 600]);
-        console.log('🔄 Android向けパターン実行結果:', result);
-        return result;
-      } catch (error) {
-        console.log('⚠️ Android向けバイブレーション失敗:', error);
-        return false;
-      }
-    }
-
-    // 通常のパターン（他のデバイス用）
-    console.log('📱 通常パターンを使用');
-    try {
-      const result = navigator.vibrate([200, 100, 200, 100, 300]);
-      
-      if (!result) {
-        console.warn('❌ バイブレーションの実行に失敗しました');
-        return false;
-      }
-      
-      console.log('✅ バイブレーションを実行しました');
-      return true;
-    } catch (error) {
-      console.log('⚠️ バイブレーション実行エラー:', error);
-      return false;
-    }
-  } catch (error) {
-    console.error('💥 バイブレーションエラー:', error);
-    return false;
-  }
-};
-
-// バイブレーション対応状況を取得
-export const getVibrationSupport = () => {
-  const support = {
-    hasVibrate: 'vibrate' in navigator,
-    isHttps: location.protocol === 'https:' || location.hostname === 'localhost',
-    isAndroid: /Android/i.test(navigator.userAgent),
-    isChrome: /Chrome/i.test(navigator.userAgent),
-    isPixel: /Pixel/i.test(navigator.userAgent),
-    isIOS: /iPhone|iPad|iPod/i.test(navigator.userAgent),
-    isSafari: /Safari/i.test(navigator.userAgent) && !/Chrome/i.test(navigator.userAgent),
-    isMobile: /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent),
-    userAgent: navigator.userAgent
-  };
-  
-  console.log('📊 バイブレーション対応状況:', support);
-  return support;
-};
-
-// enableVibrationOnUserAction関数を削除 - Chrome Intervention警告の原因のため
-
-// スマホ専用の強制バイブレーション
-export const forceVibrationOnMobile = () => {
-  try {
-    const support = getVibrationSupport();
-    console.log('📱 モバイル強制バイブレーション開始');
-    
-    if (!support.hasVibrate) {
-      console.log('❌ Vibrate APIが存在しません');
-      return false;
-    }
-
-    // 複数のパターンを試行
-    const patterns = [
-      [400, 150, 400, 150, 600],  // Android向け強力パターン
-      [300, 100, 300, 100, 500],  // 中程度パターン
-      [200, 50, 200, 50, 400],    // 軽量パターン
-      [500]                       // シンプルパターン
-    ];
-
-    let success = false;
-    for (const pattern of patterns) {
-      console.log(`🔄 パターン試行:`, pattern);
-      const result = navigator.vibrate(pattern);
-      if (result) {
-        console.log('✅ パターン成功:', pattern);
-        success = true;
-        break;
-      }
-      console.log('❌ パターン失敗:', pattern);
-    }
-    
-    return success;
-  } catch (error) {
-    console.error('💥 強制バイブレーションエラー:', error);
-    return false;
-  }
-};
+// バイブレーション機能を削除しました
 
 // すべての通知を実行
 export const triggerAllNotifications = (
   mode: TimerMode,
   settings: {
     enableSound: boolean;
-    enableVibration: boolean;
     enableBrowserNotification: boolean;
     soundVolume: number;
   }
 ) => {
   if (settings.enableSound) {
     playNotificationSound(settings.soundVolume);
-  }
-  
-  if (settings.enableVibration) {
-    // セッション完了時は明示的にユーザージェスチャーなしとして呼び出し
-    triggerVibration(false);
   }
   
   if (settings.enableBrowserNotification) {

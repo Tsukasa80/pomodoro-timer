@@ -122,7 +122,7 @@ const Timer: React.FC = () => {
       }
     });
     
-    // バイブレーション準備はユーザーアクションで行う（handlePlayPause内で実行）
+    // バイブレーション機能を削除しました
     
     // モバイル用デバッグログの購読
     const unsubscribeMobileDebugLogs = subscribeMobileDebugLogs((logs) => {
@@ -142,7 +142,7 @@ const Timer: React.FC = () => {
   };
 
   const handlePlayPause = () => {
-    // ユーザーアクションを記録（バイブレーション呼び出しなし）
+    // ユーザーアクションを記録
     window.sessionStorage.setItem('pomodoro-user-gesture', 'true');
     console.log('👆 ユーザーアクション記録 - 自動開始機能を完全有効化', {
       isMobile: 'ontouchstart' in window,

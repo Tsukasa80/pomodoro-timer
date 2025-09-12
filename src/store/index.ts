@@ -56,7 +56,6 @@ const defaultSettings = {
   enableLongBreak: false, // デフォルトは短い休憩のみ
   // Notification settings
   enableSound: true,
-  enableVibration: true,
   enableBrowserNotification: true,
   soundVolume: 80,
 };
@@ -169,7 +168,6 @@ export const useAppStore = create<AppStore>()(
         // Trigger notifications
         triggerAllNotifications(state.currentMode, {
           enableSound: state.settings.enableSound,
-          enableVibration: state.settings.enableVibration,
           enableBrowserNotification: state.settings.enableBrowserNotification,
           soundVolume: state.settings.soundVolume
         });

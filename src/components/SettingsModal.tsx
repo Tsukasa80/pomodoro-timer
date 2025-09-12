@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { FaTimes, FaSave, FaRedo } from 'react-icons/fa';
 import { useAppStore } from '../store';
-import { triggerVibration, playNotificationSound, getVibrationSupport, forceVibrationOnMobile } from '../utils/notifications';
+import { playNotificationSound } from '../utils/notifications';
 
 const SettingsModal: React.FC = () => {
   const {
@@ -42,58 +42,7 @@ const SettingsModal: React.FC = () => {
     }));
   };
 
-  const handleTestVibration = () => {
-    console.log('🧪 バイブレーションテスト開始');
-    
-    // ユーザーアクションを記録
-    window.sessionStorage.setItem('pomodoro-user-gesture', 'true');
-    console.log('👆 テスト用ユーザーアクション記録');
-    
-    const support = getVibrationSupport();
-    
-    // 通常のテスト
-    const normalResult = triggerVibration(true);
-    
-    // スマホ向け強制テスト
-    const forceResult = support.isMobile ? forceVibrationOnMobile() : false;
-    
-    let message = 'バイブレーションテスト結果:\n\n';
-    message += `• 通常テスト: ${normalResult ? '成功' : '失敗'}\n`;
-    if (support.isMobile) {
-      message += `• 強制テスト: ${forceResult ? '成功' : '失敗'}\n`;
-    }
-    message += `• Vibrate API: ${support.hasVibrate ? '対応' : '非対応'}\n`;
-    message += `• HTTPS: ${support.isHttps ? 'OK' : 'NG'}\n`;
-    message += `• モバイル: ${support.isMobile ? 'Yes' : 'No'}\n`;
-    message += `• Android: ${support.isAndroid ? 'Yes' : 'No'}\n`;
-    message += `• iOS: ${support.isIOS ? 'Yes' : 'No'}\n`;
-    message += `• Chrome: ${support.isChrome ? 'Yes' : 'No'}\n`;
-    message += `• Safari: ${support.isSafari ? 'Yes' : 'No'}\n\n`;
-    
-    const anySuccess = normalResult || forceResult;
-    
-    if (!anySuccess) {
-      message += '💡 解決方法:\n';
-      if (support.isIOS) {
-        message += '• iOSはバイブレーション未対応\n';
-        message += '• 音での通知をご利用ください\n';
-      } else if (!support.hasVibrate) {
-        message += '• このブラウザ/デバイスは未対応\n';
-      } else {
-        message += '• Chrome設定: chrome://settings/content/notifications\n';
-        message += '• 端末設定でバイブレーション許可を確認\n';
-        message += '• 省電力モードを無効にしてください\n';
-        message += '• コンソール(F12)でエラー確認\n';
-      }
-    } else {
-      message += '✅ バイブレーションが動作しました！';
-      if (forceResult && !normalResult) {
-        message += '\n（強制パターンで成功）';
-      }
-    }
-    
-    alert(message);
-  };
+  // バイブレーション機能を削除しました
 
   const handleTestSound = () => {
     playNotificationSound(formData.soundVolume);
@@ -355,34 +304,7 @@ const SettingsModal: React.FC = () => {
                 )}
               </div>
 
-              <div className="bg-gradient-to-r from-purple-50 to-violet-50 p-4 rounded-2xl border border-purple-200">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <div className="font-bold text-purple-800 mb-1">📳 バイブレーション</div>
-                    <div className="text-sm text-purple-600 font-medium">
-                      モバイルデバイスで振動します（対応端末のみ）
-                    </div>
-                  </div>
-                  <div className="flex items-center space-x-3">
-                    <button
-                      type="button"
-                      onClick={handleTestVibration}
-                      className="px-4 py-2 text-xs bg-gradient-to-r from-purple-200 to-purple-300 text-purple-800 rounded-xl hover:from-purple-300 hover:to-purple-400 transition-all duration-300 shadow-md font-medium"
-                    >
-                      📳 テスト
-                    </button>
-                    <label className="relative inline-flex items-center cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={formData.enableVibration}
-                        onChange={(e) => handleInputChange('enableVibration', e.target.checked)}
-                        className="sr-only peer"
-                      />
-                      <div className="w-14 h-8 bg-purple-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-purple-300 rounded-full peer peer-checked:after:translate-x-6 peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-7 after:w-7 after:transition-all peer-checked:bg-gradient-to-r peer-checked:from-purple-500 peer-checked:to-purple-600 shadow-lg"></div>
-                    </label>
-                  </div>
-                </div>
-              </div>
+              {/* バイブレーション機能を削除しました */}
 
               <div className="bg-gradient-to-r from-indigo-50 to-blue-50 p-4 rounded-2xl border border-indigo-200">
                 <div className="flex items-center justify-between">
@@ -446,7 +368,6 @@ const SettingsModal: React.FC = () => {
                   通知: 
                   {[
                     formData.enableSound && '音声',
-                    formData.enableVibration && 'バイブ',
                     formData.enableBrowserNotification && 'ブラウザ'
                   ].filter(Boolean).join('・') || '無効'}
                 </span>
