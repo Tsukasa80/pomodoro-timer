@@ -30,6 +30,7 @@ export interface Todo {
     longBreakMinutes?: number;
     autoStartBreak?: boolean;
     autoStartPomodoro?: boolean;
+    enableLongBreak?: boolean;
   };
 }
 

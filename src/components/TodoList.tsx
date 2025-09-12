@@ -28,6 +28,7 @@ const TodoList: React.FC = () => {
   const [customLongBreak, setCustomLongBreak] = useState(15);
   const [customAutoStartBreak, setCustomAutoStartBreak] = useState(true);
   const [customAutoStartPomodoro, setCustomAutoStartPomodoro] = useState(true);
+  const [customEnableLongBreak, setCustomEnableLongBreak] = useState(true);
 
   const handleAddTodo = (e: React.FormEvent) => {
     e.preventDefault();
@@ -81,6 +82,7 @@ const TodoList: React.FC = () => {
       setCustomLongBreak(todo.customSettings.longBreakMinutes || 15);
       setCustomAutoStartBreak(todo.customSettings.autoStartBreak ?? true);
       setCustomAutoStartPomodoro(todo.customSettings.autoStartPomodoro ?? true);
+      setCustomEnableLongBreak(todo.customSettings.enableLongBreak ?? true);
     } else {
       // Reset to defaults
       setCustomPomodoro(25);
@@ -88,6 +90,7 @@ const TodoList: React.FC = () => {
       setCustomLongBreak(15);
       setCustomAutoStartBreak(true);
       setCustomAutoStartPomodoro(true);
+      setCustomEnableLongBreak(true);
     }
   };
 
@@ -99,6 +102,7 @@ const TodoList: React.FC = () => {
         longBreakMinutes: customLongBreak,
         autoStartBreak: customAutoStartBreak,
         autoStartPomodoro: customAutoStartPomodoro,
+        enableLongBreak: customEnableLongBreak,
       }
     });
     setShowCustomSettings(null);
@@ -362,6 +366,15 @@ const TodoList: React.FC = () => {
                           className="mr-2 text-purple-600 bg-gray-100 border-gray-300 rounded focus:ring-purple-500"
                         />
                         ポモドーロを自動開始
+                      </label>
+                      <label className="flex items-center text-sm text-gray-700">
+                        <input
+                          type="checkbox"
+                          checked={customEnableLongBreak}
+                          onChange={(e) => setCustomEnableLongBreak(e.target.checked)}
+                          className="mr-2 text-purple-600 bg-gray-100 border-gray-300 rounded focus:ring-purple-500"
+                        />
+                        長い休憩を使用
                       </label>
                     </div>
                     

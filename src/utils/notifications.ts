@@ -229,3 +229,101 @@ export const triggerAllNotifications = (
     sendBrowserNotification(mode);
   }
 };
+
+// Wake Lock API - 画面消灯防止
+let wakeLock: any = null;
+
+export const requestWakeLock = async (): Promise<boolean> => {
+  try {
+    if ('wakeLock' in navigator) {
+      wakeLock = await (navigator as any).wakeLock.request('screen');
+      console.log('✅ Wake Lock有効化 - 画面消灯を防止します');
+      
+      wakeLock.addEventListener('release', () => {
+        console.log('💡 Wake Lockが解除されました');
+      });
+      
+      return true;
+    } else {
+      console.log('❌ Wake Lock APIは利用できません');
+      return false;
+    }
+  } catch (error) {
+    console.error('💥 Wake Lock取得エラー:', error);
+    return false;
+  }
+};
+
+export const releaseWakeLock = async (): Promise<void> => {
+  try {
+    if (wakeLock) {
+      await wakeLock.release();
+      wakeLock = null;
+      console.log('💡 Wake Lockを解除しました');
+    }
+  } catch (error) {
+    console.error('💥 Wake Lock解除エラー:', error);
+  }
+};
+
+// Page Visibility API - タブの非アクティブ時対策
+export const setupVisibilityChangeHandler = (onVisibilityChange: (hidden: boolean) => void) => {
+  const handleVisibilityChange = () => {
+    onVisibilityChange(document.hidden);
+  };
+  
+  document.addEventListener('visibilitychange', handleVisibilityChange);
+  
+  return () => {
+    document.removeEventListener('visibilitychange', handleVisibilityChange);
+  };
+};
+
+// バックグラウンドでの時間管理
+export class BackgroundTimer {
+  private startTime: number = 0;
+  private remainingTime: number = 0;
+  private isRunning: boolean = false;
+  
+  start(remainingTimeMs: number): void {
+    this.startTime = Date.now();
+    this.remainingTime = remainingTimeMs;
+    this.isRunning = true;
+    console.log('⏰ バックグラウンドタイマー開始:', remainingTimeMs / 1000, '秒');
+  }
+  
+  pause(): number {
+    if (!this.isRunning) return this.remainingTime;
+    
+    const elapsed = Date.now() - this.startTime;
+    this.remainingTime = Math.max(0, this.remainingTime - elapsed);
+    this.isRunning = false;
+    console.log('⏸️ バックグラウンドタイマー一時停止:', this.remainingTime / 1000, '秒残り');
+    return this.remainingTime;
+  }
+  
+  resume(): void {
+    if (this.isRunning) return;
+    
+    this.startTime = Date.now();
+    this.isRunning = true;
+    console.log('▶️ バックグラウンドタイマー再開:', this.remainingTime / 1000, '秒残り');
+  }
+  
+  getRemainingTime(): number {
+    if (!this.isRunning) return this.remainingTime;
+    
+    const elapsed = Date.now() - this.startTime;
+    return Math.max(0, this.remainingTime - elapsed);
+  }
+  
+  isComplete(): boolean {
+    return this.getRemainingTime() <= 0;
+  }
+  
+  stop(): void {
+    this.isRunning = false;
+    this.remainingTime = 0;
+    console.log('🛑 バックグラウンドタイマー停止');
+  }
+}

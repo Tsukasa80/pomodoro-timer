@@ -286,6 +286,7 @@ export const useAppStore = create<AppStore>()(
               ...(todo.customSettings.longBreakMinutes && { longBreak: todo.customSettings.longBreakMinutes }),
               ...(todo.customSettings.autoStartBreak !== undefined && { autoStartBreak: todo.customSettings.autoStartBreak }),
               ...(todo.customSettings.autoStartPomodoro !== undefined && { autoStartPomodoro: todo.customSettings.autoStartPomodoro }),
+              ...(todo.customSettings.enableLongBreak !== undefined && { enableLongBreak: todo.customSettings.enableLongBreak }),
             };
             get().updateSettings(newSettings);
           }
