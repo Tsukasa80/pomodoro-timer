@@ -22,6 +22,7 @@ interface AppStore extends AppState {
   // Settings Actions
   updateSettings: (settings: Partial<AppState['settings']>) => void;
   toggleSettings: () => void;
+  resetSettings: () => void;
   
   // Todo Actions
   addTodo: (title: string, estimatedPomodoros: number) => void;
@@ -174,11 +175,13 @@ export const useAppStore = create<AppStore>()(
         });
         
         console.log('📱 セッション完了 - 自動開始判定開始');
-        console.log('📱 現在の設定:', {
+        console.log('📱 現在の設定（詳細）:', {
           autoStartBreak: state.settings.autoStartBreak,
           autoStartPomodoro: state.settings.autoStartPomodoro,
           enableLongBreak: state.settings.enableLongBreak,
-          currentMode: state.currentMode
+          currentMode: state.currentMode,
+          completedPomodoros: state.completedPomodoros,
+          settings: state.settings // 全設定値を表示
         });
         
         if (state.currentMode === 'pomodoro') {
@@ -199,8 +202,10 @@ export const useAppStore = create<AppStore>()(
           const shouldLongBreak = state.settings.enableLongBreak && (newCompletedPomodoros % state.settings.longBreakInterval === 0);
           const nextMode = shouldLongBreak ? 'long-break' : 'short-break';
           
+          console.log(`📱 休憩判定: autoStartBreak=${state.settings.autoStartBreak}, nextMode=${nextMode}`);
+          
           if (state.settings.autoStartBreak) {
-            console.log(`📱 休憩自動開始: ${nextMode}`);
+            console.log(`📱 休憩自動開始を実行: ${nextMode}`);
             get().setMode(nextMode);
             
             // 本番環境対応: 複数の方法で確実に自動開始
@@ -236,12 +241,15 @@ export const useAppStore = create<AppStore>()(
               });
             }
           } else {
+            console.log(`📱 休憩自動開始はOFF - 手動モードに設定: ${nextMode}`);
             get().setMode(nextMode);
           }
         } else {
           // Auto-switch back to pomodoro
+          console.log(`📱 ポモドーロ判定: autoStartPomodoro=${state.settings.autoStartPomodoro}`);
+          
           if (state.settings.autoStartPomodoro) {
-            console.log('📱 ポモドーロ自動開始');
+            console.log('📱 ポモドーロ自動開始を実行');
             get().setMode('pomodoro');
             
             // 本番環境対応: 複数の方法で確実に自動開始
@@ -277,6 +285,7 @@ export const useAppStore = create<AppStore>()(
               });
             }
           } else {
+            console.log('📱 ポモドーロ自動開始はOFF - 手動モードに設定');
             get().setMode('pomodoro');
           }
         }
@@ -305,6 +314,13 @@ export const useAppStore = create<AppStore>()(
       
       toggleSettings: () => {
         set(state => ({ showSettings: !state.showSettings }));
+      },
+      
+      resetSettings: () => {
+        console.log('📱 設定をデフォルト値にリセット');
+        console.log('📱 リセット前:', get().settings);
+        set({ settings: { ...defaultSettings } });
+        console.log('📱 リセット後:', get().settings);
       },
       
       // Todo Actions

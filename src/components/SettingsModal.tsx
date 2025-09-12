@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { FaTimes, FaSave } from 'react-icons/fa';
+import { FaTimes, FaSave, FaRedo } from 'react-icons/fa';
 import { useAppStore } from '../store';
 import { triggerVibration, playNotificationSound, getVibrationSupport, forceVibrationOnMobile, enableVibrationOnUserAction } from '../utils/notifications';
 
@@ -9,6 +9,7 @@ const SettingsModal: React.FC = () => {
     showSettings,
     updateSettings,
     toggleSettings,
+    resetSettings,
   } = useAppStore();
 
   const [formData, setFormData] = useState(settings);
@@ -25,6 +26,13 @@ const SettingsModal: React.FC = () => {
 
   const handleReset = () => {
     setFormData(settings);
+  };
+
+  const handleResetToDefault = () => {
+    if (window.confirm('設定をデフォルト値にリセットしますか？\n（自動開始機能も含めてすべての設定がリセットされます）')) {
+      resetSettings();
+      setFormData(useAppStore.getState().settings);
+    }
   };
 
   const handleInputChange = (field: keyof typeof settings, value: any) => {
@@ -409,6 +417,14 @@ const SettingsModal: React.FC = () => {
                 className="px-4 py-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors"
               >
                 キャンセル
+              </button>
+              <button
+                type="button"
+                onClick={handleResetToDefault}
+                className="px-6 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors flex items-center"
+              >
+                <FaRedo className="mr-2" />
+                デフォルトにリセット
               </button>
               <button
                 type="submit"
