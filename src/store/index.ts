@@ -208,38 +208,26 @@ export const useAppStore = create<AppStore>()(
             console.log(`📱 休憩自動開始を実行: ${nextMode}`);
             get().setMode(nextMode);
             
-            // 本番環境対応: 複数の方法で確実に自動開始
-            const isMobile = /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-            const startBreakTimer = () => {
+            // GitHub Pages対応: 確実な自動開始
+            console.log(`📱 自動開始を実行: ${nextMode}`);
+            
+            // 同期的に実行（GitHub Pagesで確実）
+            setTimeout(() => {
               const currentState = get();
-              if (currentState.currentMode === nextMode && !currentState.isRunning) {
-                console.log('📱 自動開始: 休憩タイマー開始');
-                get().startTimer();
-                return true;
-              }
-              return false;
-            };
-            
-            console.log(`📱 デバイス判定: ${isMobile ? 'モバイル' : 'デスクトップ'}`);
-            
-            // 1. 即座に試行
-            if (!startBreakTimer()) {
-              // 2. requestAnimationFrame で試行
-              requestAnimationFrame(() => {
-                if (!startBreakTimer()) {
-                  // 3. モバイルでは少し長いタイムアウト、デスクトップは短く
-                  const delay = isMobile ? 50 : 10;
-                  setTimeout(() => {
-                    if (!startBreakTimer()) {
-                      // 4. 最終手段：さらに長いタイムアウト（モバイル専用）
-                      if (isMobile) {
-                        setTimeout(startBreakTimer, 200);
-                      }
-                    }
-                  }, delay);
-                }
+              console.log('🔄 自動開始タイマーチェック:', {
+                currentMode: currentState.currentMode,
+                expectedMode: nextMode,
+                isRunning: currentState.isRunning,
+                timeLeft: currentState.timeLeft
               });
-            }
+              
+              if (currentState.currentMode === nextMode && !currentState.isRunning) {
+                console.log('✅ 自動開始: 休憩タイマー開始');
+                get().startTimer();
+              } else {
+                console.log('⚠️ 自動開始条件が不一致');
+              }
+            }, 100);
           } else {
             console.log(`📱 休憩自動開始はOFF - 手動モードに設定: ${nextMode}`);
             get().setMode(nextMode);
@@ -252,38 +240,26 @@ export const useAppStore = create<AppStore>()(
             console.log('📱 ポモドーロ自動開始を実行');
             get().setMode('pomodoro');
             
-            // 本番環境対応: 複数の方法で確実に自動開始
-            const isMobile = /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-            const startPomodoroTimer = () => {
+            // GitHub Pages対応: 確実な自動開始
+            console.log('📱 ポモドーロ自動開始を実行');
+            
+            // 同期的に実行（GitHub Pagesで確実）
+            setTimeout(() => {
               const currentState = get();
-              if (currentState.currentMode === 'pomodoro' && !currentState.isRunning) {
-                console.log('📱 自動開始: ポモドーロタイマー開始');
-                get().startTimer();
-                return true;
-              }
-              return false;
-            };
-            
-            console.log(`📱 デバイス判定: ${isMobile ? 'モバイル' : 'デスクトップ'}`);
-            
-            // 1. 即座に試行
-            if (!startPomodoroTimer()) {
-              // 2. requestAnimationFrame で試行
-              requestAnimationFrame(() => {
-                if (!startPomodoroTimer()) {
-                  // 3. モバイルでは少し長いタイムアウト、デスクトップは短く
-                  const delay = isMobile ? 50 : 10;
-                  setTimeout(() => {
-                    if (!startPomodoroTimer()) {
-                      // 4. 最終手段：さらに長いタイムアウト（モバイル専用）
-                      if (isMobile) {
-                        setTimeout(startPomodoroTimer, 200);
-                      }
-                    }
-                  }, delay);
-                }
+              console.log('🔄 ポモドーロ自動開始チェック:', {
+                currentMode: currentState.currentMode,
+                expectedMode: 'pomodoro',
+                isRunning: currentState.isRunning,
+                timeLeft: currentState.timeLeft
               });
-            }
+              
+              if (currentState.currentMode === 'pomodoro' && !currentState.isRunning) {
+                console.log('✅ 自動開始: ポモドーロタイマー開始');
+                get().startTimer();
+              } else {
+                console.log('⚠️ ポモドーロ自動開始条件が不一致');
+              }
+            }, 100);
           } else {
             console.log('📱 ポモドーロ自動開始はOFF - 手動モードに設定');
             get().setMode('pomodoro');
