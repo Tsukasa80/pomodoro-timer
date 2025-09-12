@@ -111,12 +111,21 @@ export const triggerVibration = (isUserGesture = false) => {
     console.log('✅ プロトコルチェック通過');
     console.log('👆 ユーザージェスチャー:', isUserGesture ? 'あり' : 'なし');
 
-    // ユーザージェスチャーなしの場合は、セッションストレージで確認
+    // ユーザージェスチャーチェック - 厳格に実行
     const hasUserInteracted = window.sessionStorage.getItem('pomodoro-user-gesture') === 'true';
+    console.log('🔍 ユーザー操作チェック:', { 
+      isUserGesture, 
+      hasUserInteracted, 
+      sessionValue: window.sessionStorage.getItem('pomodoro-user-gesture') 
+    });
+    
     if (!isUserGesture && !hasUserInteracted) {
-      console.log('⚠️ ユーザージェスチャーなし - バイブレーションをスキップ');
+      console.log('⚠️ ユーザージェスチャーなし - バイブレーションをスキップします');
+      console.log('💡 ヒント: 画面をクリック/タップするとバイブレーションが有効になります');
       return false;
     }
+    
+    console.log('✅ ユーザージェスチャー確認OK - バイブレーション実行を継続');
 
     // Android Chromeの特別対応
     const isAndroidChrome = /Android.*Chrome/i.test(navigator.userAgent);
@@ -249,7 +258,8 @@ export const triggerAllNotifications = (
   }
   
   if (settings.enableVibration) {
-    triggerVibration();
+    // セッション完了時は明示的にユーザージェスチャーなしとして呼び出し
+    triggerVibration(false);
   }
   
   if (settings.enableBrowserNotification) {
