@@ -173,6 +173,13 @@ export const useAppStore = create<AppStore>()(
           soundVolume: state.settings.soundVolume
         });
         
+        console.log('📱 セッション完了 - 自動開始判定開始');
+        console.log('📱 現在の設定:', {
+          autoStartBreak: state.settings.autoStartBreak,
+          autoStartPomodoro: state.settings.autoStartPomodoro,
+          enableLongBreak: state.settings.enableLongBreak,
+          currentMode: state.currentMode
+        });
         
         if (state.currentMode === 'pomodoro') {
           const newCompletedPomodoros = state.completedPomodoros + 1;
@@ -196,16 +203,27 @@ export const useAppStore = create<AppStore>()(
             console.log(`📱 休憩自動開始: ${nextMode}`);
             get().setMode(nextMode);
             
-            // より確実な自動開始（本番環境対応）
-            requestAnimationFrame(() => {
+            // 本番環境対応: 複数の方法で確実に自動開始
+            const startBreakTimer = () => {
+              const currentState = get();
+              if (currentState.currentMode === nextMode && !currentState.isRunning) {
+                console.log('📱 自動開始: 休憩タイマー開始');
+                get().startTimer();
+                return true;
+              }
+              return false;
+            };
+            
+            // 1. 即座に試行
+            if (!startBreakTimer()) {
+              // 2. requestAnimationFrame で試行
               requestAnimationFrame(() => {
-                const currentState = get();
-                if (currentState.currentMode === nextMode && !currentState.isRunning) {
-                  console.log('📱 自動開始: 休憩タイマー開始');
-                  get().startTimer();
+                if (!startBreakTimer()) {
+                  // 3. 短いタイムアウトで確実に実行
+                  setTimeout(startBreakTimer, 10);
                 }
               });
-            });
+            }
           } else {
             get().setMode(nextMode);
           }
@@ -215,16 +233,27 @@ export const useAppStore = create<AppStore>()(
             console.log('📱 ポモドーロ自動開始');
             get().setMode('pomodoro');
             
-            // より確実な自動開始（本番環境対応）
-            requestAnimationFrame(() => {
+            // 本番環境対応: 複数の方法で確実に自動開始
+            const startPomodoroTimer = () => {
+              const currentState = get();
+              if (currentState.currentMode === 'pomodoro' && !currentState.isRunning) {
+                console.log('📱 自動開始: ポモドーロタイマー開始');
+                get().startTimer();
+                return true;
+              }
+              return false;
+            };
+            
+            // 1. 即座に試行
+            if (!startPomodoroTimer()) {
+              // 2. requestAnimationFrame で試行
               requestAnimationFrame(() => {
-                const currentState = get();
-                if (currentState.currentMode === 'pomodoro' && !currentState.isRunning) {
-                  console.log('📱 自動開始: ポモドーロタイマー開始');
-                  get().startTimer();
+                if (!startPomodoroTimer()) {
+                  // 3. 短いタイムアウトで確実に実行
+                  setTimeout(startPomodoroTimer, 10);
                 }
               });
-            });
+            }
           } else {
             get().setMode('pomodoro');
           }
