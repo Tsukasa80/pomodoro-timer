@@ -9,6 +9,7 @@ import {
   BackgroundTimer,
   enableVibrationOnUserAction 
 } from '../utils/notifications';
+import { addMobileDebugLog, subscribeMobileDebugLogs, clearMobileDebugLogs } from '../utils/mobileDebug';
 
 const Timer: React.FC = () => {
   const {
@@ -31,16 +32,22 @@ const Timer: React.FC = () => {
   const isTabVisibleRef = useRef(true);
   const wakeLockSupportedRef = useRef(false);
   
-  // デバッグログ用state (開発環境でのみ表示)
+  // デバッグログ用state
   const [debugLogs, setDebugLogs] = React.useState<string[]>([]);
+  const [mobileDebugLogs, setMobileDebugLogs] = React.useState<string[]>([]);
+  const [showMobileDebug, setShowMobileDebug] = React.useState(false);
   
   const addDebugLog = (message: string) => {
+    // 従来のデバッグログ (開発環境のみ)
     if (process.env.NODE_ENV === 'development') {
       setDebugLogs(prev => {
         const newLogs = [...prev, `${new Date().toLocaleTimeString()}: ${message}`];
         return newLogs.slice(-5); // 最新5件のみ保持
       });
     }
+    
+    // モバイル用デバッグログ (本番環境でも表示)
+    addMobileDebugLog(message);
   };
 
   useEffect(() => {
@@ -119,10 +126,16 @@ const Timer: React.FC = () => {
     // バイブレーション準備（ユーザーアクション時に有効化）
     enableVibrationOnUserAction();
     
+    // モバイル用デバッグログの購読
+    const unsubscribeMobileDebugLogs = subscribeMobileDebugLogs((logs) => {
+      setMobileDebugLogs(logs);
+    });
+    
     return () => {
       removeVisibilityHandler();
       releaseWakeLock();
       backgroundTimerRef.current.stop();
+      unsubscribeMobileDebugLogs();
     };
   }, [settings.enableBrowserNotification, requestNotificationPermission]); // isRunning, timeLeft, tickを依存配列から除去
 
@@ -273,7 +286,7 @@ const Timer: React.FC = () => {
         </div>
       )}
       
-      {/* Debug Logs */}
+      {/* Debug Logs (開発環境) */}
       {process.env.NODE_ENV === 'development' && debugLogs.length > 0 && (
         <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
           <div className="text-yellow-800 font-semibold text-xs mb-2">
@@ -286,6 +299,42 @@ const Timer: React.FC = () => {
               </div>
             ))}
           </div>
+        </div>
+      )}
+      
+      {/* Mobile Debug Logs (本番環境でも表示) */}
+      {'ontouchstart' in window && mobileDebugLogs.length > 0 && (
+        <div className="mt-4">
+          <div className="flex justify-between items-center mb-2">
+            <div className="text-blue-800 font-semibold text-sm">
+              📱 デバッグ情報 (最新10件):
+            </div>
+            <div className="flex space-x-2">
+              <button
+                onClick={() => setShowMobileDebug(!showMobileDebug)}
+                className="text-xs px-2 py-1 bg-blue-100 text-blue-700 rounded hover:bg-blue-200"
+              >
+                {showMobileDebug ? '非表示' : '表示'}
+              </button>
+              <button
+                onClick={clearMobileDebugLogs}
+                className="text-xs px-2 py-1 bg-red-100 text-red-700 rounded hover:bg-red-200"
+              >
+                クリア
+              </button>
+            </div>
+          </div>
+          {showMobileDebug && (
+            <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg max-h-40 overflow-y-auto">
+              <div className="space-y-1">
+                {mobileDebugLogs.map((log, index) => (
+                  <div key={index} className="text-blue-800 text-xs font-mono break-words">
+                    {log}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       )}
     </div>
