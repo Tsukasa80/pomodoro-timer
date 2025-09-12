@@ -61,7 +61,7 @@ const Timer: React.FC = () => {
         clearInterval(interval);
       }
     };
-  }, [isRunning, tick, timeLeft]);
+  }, [isRunning, tick]); // timeLeftを依存配列から除去
 
   // Component initialization
   useEffect(() => {
@@ -104,7 +104,7 @@ const Timer: React.FC = () => {
       releaseWakeLock();
       backgroundTimerRef.current.stop();
     };
-  }, [settings.enableBrowserNotification, requestNotificationPermission, isRunning, timeLeft, tick]);
+  }, [settings.enableBrowserNotification, requestNotificationPermission]); // isRunning, timeLeft, tickを依存配列から除去
 
   const handleModeChange = (mode: typeof currentMode) => {
     setMode(mode);
