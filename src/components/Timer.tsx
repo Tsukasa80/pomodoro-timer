@@ -144,7 +144,12 @@ const Timer: React.FC = () => {
   const handlePlayPause = () => {
     // ユーザーアクションを記録（バイブレーション呼び出しなし）
     window.sessionStorage.setItem('pomodoro-user-gesture', 'true');
-    console.log('👆 ユーザーアクション記録 - バイブレーション機能を有効化');
+    console.log('👆 ユーザーアクション記録 - 自動開始機能を完全有効化', {
+      isMobile: 'ontouchstart' in window,
+      currentCompletedPomodoros: completedPomodoros,
+      isRunning,
+      currentMode
+    });
     
     if (isRunning) {
       pauseTimer();

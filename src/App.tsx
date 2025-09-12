@@ -12,16 +12,28 @@ function App() {
   // アプリ初期化時にユーザーアクションを記録
   useEffect(() => {
     const handleUserAction = () => {
-      // セッションストレージにユーザーアクションを記録
-      window.sessionStorage.setItem('pomodoro-user-gesture', 'true');
-      console.log('👆 ユーザーアクションを記録（自動開始機能有効化）');
+      if (window.sessionStorage.getItem('pomodoro-user-gesture') !== 'true') {
+        // セッションストレージにユーザーアクションを記録
+        window.sessionStorage.setItem('pomodoro-user-gesture', 'true');
+        console.log('👆 ユーザーアクションを記録（自動開始機能有効化）');
+      }
     };
 
     // より多くのイベントを監視（スマホ対応）
-    const events = ['click', 'touchstart', 'touchend', 'keydown', 'scroll'];
+    const events = ['click', 'touchstart', 'touchend', 'keydown', 'scroll', 'pointerdown'];
     
     events.forEach(event => {
-      document.addEventListener(event, handleUserAction, { once: true, passive: true });
+      document.addEventListener(event, handleUserAction, { once: false, passive: true });
+    });
+
+    // より積極的にユーザーアクションを記録（GitHub Pages対応）
+    const recordUserInteraction = () => {
+      handleUserAction();
+    };
+    
+    // ページロード後の最初のクリックやタッチを確実にキャッチ
+    window.addEventListener('load', () => {
+      setTimeout(recordUserInteraction, 100);
     });
 
     return () => {

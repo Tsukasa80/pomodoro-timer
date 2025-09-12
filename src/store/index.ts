@@ -230,11 +230,14 @@ export const useAppStore = create<AppStore>()(
               });
               
               if (currentState.currentMode === nextMode && !currentState.isRunning) {
-                if (isMobile && !hasUserGesture) {
-                  console.log('📱 スマホ: ユーザージェスチャー待ち - 自動開始をスキップ');
-                  // モバイルでユーザージェスチャーがない場合、手動開始を促す
+                // ユーザーがタイマーを操作したことがある場合は自動開始を許可
+                const hasUserInteracted = hasUserGesture || currentState.completedPomodoros > 0;
+                
+                if (isMobile && !hasUserInteracted) {
+                  console.log('📱 スマホ: 初回ユーザーアクション待ち - 自動開始をスキップ');
+                  // 初回のユーザーアクションがない場合のみスキップ
                 } else {
-                  console.log('✅ 自動開始: 休憩タイマー開始');
+                  console.log('✅ 自動開始: 休憩タイマー開始', { isMobile, hasUserGesture, hasUserInteracted, completedPomodoros: currentState.completedPomodoros });
                   // さらにrequestAnimationFrameで確実に実行
                   requestAnimationFrame(() => {
                     get().startTimer();
@@ -278,11 +281,14 @@ export const useAppStore = create<AppStore>()(
               });
               
               if (currentState.currentMode === 'pomodoro' && !currentState.isRunning) {
-                if (isMobile && !hasUserGesture) {
-                  console.log('📱 スマホ: ユーザージェスチャー待ち - 自動開始をスキップ');
-                  // モバイルでユーザージェスチャーがない場合、手動開始を促す
+                // ユーザーがタイマーを操作したことがある場合は自動開始を許可
+                const hasUserInteracted = hasUserGesture || currentState.completedPomodoros > 0;
+                
+                if (isMobile && !hasUserInteracted) {
+                  console.log('📱 スマホ: 初回ユーザーアクション待ち - 自動開始をスキップ');
+                  // 初回のユーザーアクションがない場合のみスキップ
                 } else {
-                  console.log('✅ 自動開始: ポモドーロタイマー開始');
+                  console.log('✅ 自動開始: ポモドーロタイマー開始', { isMobile, hasUserGesture, hasUserInteracted, completedPomodoros: currentState.completedPomodoros });
                   // さらにrequestAnimationFrameで確実に実行
                   requestAnimationFrame(() => {
                     get().startTimer();
