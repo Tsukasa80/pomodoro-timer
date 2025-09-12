@@ -58,7 +58,8 @@
       "Read(/C:\\Users\\81705\\cc-test\\GritTracker\\src\\components/**)",
       "Bash(grep:*)",
       "Bash(npm run prepare-deploy:*)",
-      "Bash(sed:*)"
+      "Bash(sed:*)",
+      "Bash(git restore:*)"
     ],
     "deny": [],
     "ask": []
