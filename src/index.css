@@ -18,3 +18,65 @@
     min-height: 100vh;
   }
 }
+
+@layer components {
+  /* Custom styles for better slider appearance */
+  .slider::-webkit-slider-thumb {
+    appearance: none;
+    height: 20px;
+    width: 20px;
+    border-radius: 50%;
+    background: #ef4444;
+    cursor: pointer;
+    box-shadow: 0 0 2px 0 #555;
+    transition: all 0.3s;
+  }
+
+  .slider::-webkit-slider-thumb:hover {
+    background: #dc2626;
+    box-shadow: 0 0 5px 0 #ef4444;
+    transform: scale(1.1);
+  }
+
+  .slider::-moz-range-thumb {
+    height: 20px;
+    width: 20px;
+    border-radius: 50%;
+    background: #ef4444;
+    cursor: pointer;
+    border: none;
+    box-shadow: 0 0 2px 0 #555;
+    transition: all 0.3s;
+  }
+
+  .slider::-moz-range-thumb:hover {
+    background: #dc2626;
+    box-shadow: 0 0 5px 0 #ef4444;
+    transform: scale(1.1);
+  }
+
+  /* Glassmorphism enhancements */
+  .glass {
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+  }
+
+  .glass-dark {
+    background: rgba(0, 0, 0, 0.2);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+}
+
+@layer utilities {
+  /* Custom animations */
+  @keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-20px); }
+  }
+
+  .animate-float {
+    animation: float 6s ease-in-out infinite;
+  }
+}
