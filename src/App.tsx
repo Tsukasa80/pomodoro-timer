@@ -11,22 +11,23 @@ function App() {
 
   // アプリ初期化時にユーザーアクションを記録
   useEffect(() => {
-    const handleFirstUserAction = () => {
-      // セッションストレージにユーザーアクションを記録（バイブレーション呼び出しなし）
+    const handleUserAction = () => {
+      // セッションストレージにユーザーアクションを記録
       window.sessionStorage.setItem('pomodoro-user-gesture', 'true');
-      console.log('👆 初回ユーザーアクションを記録（バイブレーション活性化準備完了）');
-      
-      // 一度実行したら削除
-      document.removeEventListener('click', handleFirstUserAction);
-      document.removeEventListener('touchstart', handleFirstUserAction);
+      console.log('👆 ユーザーアクションを記録（自動開始機能有効化）');
     };
 
-    document.addEventListener('click', handleFirstUserAction);
-    document.addEventListener('touchstart', handleFirstUserAction);
+    // より多くのイベントを監視（スマホ対応）
+    const events = ['click', 'touchstart', 'touchend', 'keydown', 'scroll'];
+    
+    events.forEach(event => {
+      document.addEventListener(event, handleUserAction, { once: true, passive: true });
+    });
 
     return () => {
-      document.removeEventListener('click', handleFirstUserAction);
-      document.removeEventListener('touchstart', handleFirstUserAction);
+      events.forEach(event => {
+        document.removeEventListener(event, handleUserAction);
+      });
     };
   }, []);
 

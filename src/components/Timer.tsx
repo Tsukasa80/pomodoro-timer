@@ -279,20 +279,49 @@ const Timer: React.FC = () => {
         </div>
       )}
       
-      {/* Mobile Support Status */}
-      {process.env.NODE_ENV === 'development' && (
+      {/* Mobile Support Status - 常に表示（スマホのみ）*/}
+      {'ontouchstart' in window && (
+        <div className="mt-4 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-2xl text-xs shadow-lg">
+          <div className="text-blue-800 font-semibold mb-2">
+            📱 モバイル自動開始状況:
+          </div>
+          <div className="text-blue-700 space-y-2 bg-white p-3 rounded-xl">
+            <div className="flex items-center space-x-2">
+              <span className={window.sessionStorage.getItem('pomodoro-user-gesture') === 'true' ? 'text-green-600' : 'text-orange-600'}>
+                {window.sessionStorage.getItem('pomodoro-user-gesture') === 'true' ? '✅' : '⏳'}
+              </span>
+              <span className="font-medium">
+                自動開始: {window.sessionStorage.getItem('pomodoro-user-gesture') === 'true' ? '有効' : 'ユーザーアクション待ち'}
+              </span>
+            </div>
+            <div className="flex items-center space-x-2">
+              <span className={wakeLockSupportedRef.current ? 'text-green-600' : 'text-red-600'}>
+                {wakeLockSupportedRef.current ? '✅' : '❌'}
+              </span>
+              <span className="font-medium">Wake Lock: {wakeLockSupportedRef.current ? '対応' : '非対応'}</span>
+            </div>
+            <div className="flex items-center space-x-2">
+              <span className={isTabVisibleRef.current ? 'text-green-600' : 'text-orange-600'}>
+                {isTabVisibleRef.current ? '👁️' : '🙈'}
+              </span>
+              <span className="font-medium">タブ状態: {isTabVisibleRef.current ? 'アクティブ' : '非アクティブ'}</span>
+            </div>
+            <div className="text-blue-600 font-medium text-center mt-2">
+              自動開始が動作しない場合は、画面をタップしてください
+            </div>
+          </div>
+        </div>
+      )}
+      
+      {/* Desktop Support Status - 開発環境のみ */}
+      {process.env.NODE_ENV === 'development' && !('ontouchstart' in window) && (
         <div className="mt-4 p-4 bg-gradient-to-r from-gray-50 to-blue-50 border border-gray-200 rounded-2xl text-xs shadow-lg">
           <div className="text-gray-700 font-semibold mb-2">
-            📱 スマホ対応状況:
+            💻 デスクトップ対応状況:
           </div>
           <div className="text-gray-600 space-y-1">
             <div>Wake Lock: {wakeLockSupportedRef.current ? '✅ 対応' : '❌ 非対応'} | タブ状態: {isTabVisibleRef.current ? '👁️ アクティブ' : '🙈 非アクティブ'}</div>
-            <div>
-              自動開始: {'ontouchstart' in window ? 
-                (window.sessionStorage.getItem('pomodoro-user-gesture') === 'true' ? 
-                  '✅ 有効' : '⏳ ユーザーアクション待ち') : 
-                '✅ デスクトップ対応'} | デバイス: {'ontouchstart' in window ? '📱 モバイル' : '💻 デスクトップ'}
-            </div>
+            <div>自動開始: ✅ デスクトップ対応</div>
           </div>
         </div>
       )}
