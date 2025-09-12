@@ -206,14 +206,12 @@ export const useAppStore = create<AppStore>()(
             console.log(`📱 休憩自動開始を実行: ${nextMode}`);
             
             console.log('✅ 休憩自動開始を実行（スマホ判定なし）');
-            // 一気にモード変更＋タイマー開始
+            // モード変更
             get().setMode(nextMode);
             
-            // 次のフレームで確実にタイマー開始（React状態更新後）
-            requestAnimationFrame(() => {
-              console.log('🚀 requestAnimationFrame内でタイマー開始');
-              get().startTimer();
-            });
+            // 直接タイマー開始
+            console.log('🚀 直接タイマー開始');
+            get().startTimer();
           } else {
             console.log(`📱 休憩自動開始はOFF - 手動モードに設定: ${nextMode}`);
             get().setMode(nextMode);
@@ -224,14 +222,12 @@ export const useAppStore = create<AppStore>()(
           
           if (state.settings.autoStartPomodoro) {
             console.log('✅ ポモドーロ自動開始を実行（スマホ判定なし）');
-            // 一気にモード変更＋タイマー開始
+            // モード変更
             get().setMode('pomodoro');
             
-            // 次のフレームで確実にタイマー開始（React状態更新後）
-            requestAnimationFrame(() => {
-              console.log('🚀 ポモドーロ requestAnimationFrame内でタイマー開始');
-              get().startTimer();
-            });
+            // 直接タイマー開始
+            console.log('🚀 ポモドーロ直接タイマー開始');
+            get().startTimer();
           } else {
             console.log('📱 ポモドーロ自動開始はOFF - 手動モードに設定');
             get().setMode('pomodoro');
