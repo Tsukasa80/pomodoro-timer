@@ -87,7 +87,7 @@ export const playNotificationSound = (volume: number = 80) => {
   }
 };
 
-// バイブレーション（デバッグ機能強化）
+// バイブレーション（ユーザージェスチャー確認付き）
 export const triggerVibration = (isUserGesture = false) => {
   try {
     // デバッグ情報を出力
@@ -105,11 +105,18 @@ export const triggerVibration = (isUserGesture = false) => {
 
     // HTTPSでない場合の警告
     if (location.protocol !== 'https:' && location.hostname !== 'localhost') {
-      console.warn('⚠️ バイブレーション機能にはHTTLS接続が必要です');
+      console.warn('⚠️ バイブレーション機能にはHTTPS接続が必要です');
       return false;
     }
     console.log('✅ プロトコルチェック通過');
     console.log('👆 ユーザージェスチャー:', isUserGesture ? 'あり' : 'なし');
+
+    // ユーザージェスチャーなしの場合は、セッションストレージで確認
+    const hasUserInteracted = window.sessionStorage.getItem('pomodoro-user-gesture') === 'true';
+    if (!isUserGesture && !hasUserInteracted) {
+      console.log('⚠️ ユーザージェスチャーなし - バイブレーションをスキップ');
+      return false;
+    }
 
     // Android Chromeの特別対応
     const isAndroidChrome = /Android.*Chrome/i.test(navigator.userAgent);
@@ -118,22 +125,32 @@ export const triggerVibration = (isUserGesture = false) => {
     if (isAndroidChrome || isPixel) {
       console.log('📱 Android Chrome/Pixel検出 - 特別パターンを使用');
       // Android向け強めのパターン
-      const result = navigator.vibrate([400, 150, 400, 150, 600]);
-      console.log('🔄 Android向けパターン実行結果:', result);
-      return result;
+      try {
+        const result = navigator.vibrate([400, 150, 400, 150, 600]);
+        console.log('🔄 Android向けパターン実行結果:', result);
+        return result;
+      } catch (error) {
+        console.log('⚠️ Android向けバイブレーション失敗:', error);
+        return false;
+      }
     }
 
     // 通常のパターン（他のデバイス用）
     console.log('📱 通常パターンを使用');
-    const result = navigator.vibrate([200, 100, 200, 100, 300]);
-    
-    if (!result) {
-      console.warn('❌ バイブレーションの実行に失敗しました');
+    try {
+      const result = navigator.vibrate([200, 100, 200, 100, 300]);
+      
+      if (!result) {
+        console.warn('❌ バイブレーションの実行に失敗しました');
+        return false;
+      }
+      
+      console.log('✅ バイブレーションを実行しました');
+      return true;
+    } catch (error) {
+      console.log('⚠️ バイブレーション実行エラー:', error);
       return false;
     }
-    
-    console.log('✅ バイブレーションを実行しました');
-    return true;
   } catch (error) {
     console.error('💥 バイブレーションエラー:', error);
     return false;
