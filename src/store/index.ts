@@ -52,7 +52,7 @@ const defaultSettings = {
   autoStartBreak: true,
   autoStartPomodoro: true,
   longBreakInterval: 4, // 4 pomodoros (standard)
-  enableLongBreak: true,
+  enableLongBreak: false, // デフォルトは短い休憩のみ
   // Notification settings
   enableSound: true,
   enableVibration: true,
@@ -204,6 +204,7 @@ export const useAppStore = create<AppStore>()(
             get().setMode(nextMode);
             
             // 本番環境対応: 複数の方法で確実に自動開始
+            const isMobile = /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
             const startBreakTimer = () => {
               const currentState = get();
               if (currentState.currentMode === nextMode && !currentState.isRunning) {
@@ -214,13 +215,23 @@ export const useAppStore = create<AppStore>()(
               return false;
             };
             
+            console.log(`📱 デバイス判定: ${isMobile ? 'モバイル' : 'デスクトップ'}`);
+            
             // 1. 即座に試行
             if (!startBreakTimer()) {
               // 2. requestAnimationFrame で試行
               requestAnimationFrame(() => {
                 if (!startBreakTimer()) {
-                  // 3. 短いタイムアウトで確実に実行
-                  setTimeout(startBreakTimer, 10);
+                  // 3. モバイルでは少し長いタイムアウト、デスクトップは短く
+                  const delay = isMobile ? 50 : 10;
+                  setTimeout(() => {
+                    if (!startBreakTimer()) {
+                      // 4. 最終手段：さらに長いタイムアウト（モバイル専用）
+                      if (isMobile) {
+                        setTimeout(startBreakTimer, 200);
+                      }
+                    }
+                  }, delay);
                 }
               });
             }
@@ -234,6 +245,7 @@ export const useAppStore = create<AppStore>()(
             get().setMode('pomodoro');
             
             // 本番環境対応: 複数の方法で確実に自動開始
+            const isMobile = /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
             const startPomodoroTimer = () => {
               const currentState = get();
               if (currentState.currentMode === 'pomodoro' && !currentState.isRunning) {
@@ -244,13 +256,23 @@ export const useAppStore = create<AppStore>()(
               return false;
             };
             
+            console.log(`📱 デバイス判定: ${isMobile ? 'モバイル' : 'デスクトップ'}`);
+            
             // 1. 即座に試行
             if (!startPomodoroTimer()) {
               // 2. requestAnimationFrame で試行
               requestAnimationFrame(() => {
                 if (!startPomodoroTimer()) {
-                  // 3. 短いタイムアウトで確実に実行
-                  setTimeout(startPomodoroTimer, 10);
+                  // 3. モバイルでは少し長いタイムアウト、デスクトップは短く
+                  const delay = isMobile ? 50 : 10;
+                  setTimeout(() => {
+                    if (!startPomodoroTimer()) {
+                      // 4. 最終手段：さらに長いタイムアウト（モバイル専用）
+                      if (isMobile) {
+                        setTimeout(startPomodoroTimer, 200);
+                      }
+                    }
+                  }, delay);
                 }
               });
             }
