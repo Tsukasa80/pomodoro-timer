@@ -55,7 +55,8 @@
       "Read(/C:\\Users\\81705\\cc-test\\GritTracker\\src\\components/**)",
       "Read(/C:\\Users\\81705\\cc-test\\GritTracker\\src\\components/**)",
       "Read(/C:\\Users\\81705\\cc-test\\GritTracker\\src\\components/**)",
-      "Read(/C:\\Users\\81705\\cc-test\\GritTracker\\src\\components/**)"
+      "Read(/C:\\Users\\81705\\cc-test\\GritTracker\\src\\components/**)",
+      "Bash(grep:*)"
     ],
     "deny": [],
     "ask": []

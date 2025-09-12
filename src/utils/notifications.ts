@@ -161,10 +161,20 @@ export const getVibrationSupport = () => {
 // ユーザーアクション後にバイブレーションを有効化
 export const enableVibrationOnUserAction = () => {
   if ('vibrate' in navigator) {
-    // 短い無音バイブレーションでAPIを活性化
-    navigator.vibrate(1);
-    console.log('✅ バイブレーションAPIを活性化しました');
-    return true;
+    try {
+      // 短い無音バイブレーションでAPIを活性化（ユーザージェスチャー後のみ）
+      const result = navigator.vibrate(1);
+      if (result) {
+        console.log('✅ バイブレーションAPIを活性化しました');
+        return true;
+      } else {
+        console.log('⚠️ バイブレーション活性化に失敗しました（ユーザージェスチャーが必要な可能性）');
+        return false;
+      }
+    } catch (error) {
+      console.log('⚠️ バイブレーション活性化エラー:', error);
+      return false;
+    }
   }
   return false;
 };
