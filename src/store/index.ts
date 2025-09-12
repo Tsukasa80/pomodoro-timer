@@ -265,9 +265,6 @@ export const useAppStore = create<AppStore>()(
             get().setMode('pomodoro');
           }
         }
-        
-        // 自動開始設定に関係なく一旦停止（requestAnimationFrameで再開）
-        set({ isRunning: false });
       },
       
       // Settings Actions
