@@ -173,6 +173,7 @@ export const useAppStore = create<AppStore>()(
         });
         
         console.log('📱 セッション完了 - 自動開始判定開始');
+        alert('🔍 DEBUG: セッション完了！自動開始判定開始');
         console.log('📱 現在の設定（詳細）:', {
           autoStartBreak: state.settings.autoStartBreak,
           autoStartPomodoro: state.settings.autoStartPomodoro,
@@ -206,11 +207,13 @@ export const useAppStore = create<AppStore>()(
             console.log(`📱 休憩自動開始を実行: ${nextMode}`);
             
             console.log('✅ 休憩自動開始を実行（スマホ判定なし）');
+            alert(`🔍 DEBUG: 休憩自動開始実行中 - ${nextMode}`);
             // モード変更
             get().setMode(nextMode);
             
             // 直接タイマー開始
             console.log('🚀 直接タイマー開始');
+            alert('🔍 DEBUG: startTimer()実行');
             get().startTimer();
           } else {
             console.log(`📱 休憩自動開始はOFF - 手動モードに設定: ${nextMode}`);
