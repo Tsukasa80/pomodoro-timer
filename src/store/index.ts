@@ -10,6 +10,11 @@ import {
 } from '../utils';
 
 interface AppStore extends AppState {
+  // Debug Info
+  debugInfo: string[];
+  addDebugInfo: (info: string) => void;
+  clearDebugInfo: () => void;
+  
   // Timer Actions
   setMode: (mode: TimerMode) => void;
   startTimer: () => void;
@@ -74,6 +79,19 @@ export const useAppStore = create<AppStore>()(
       dailyReports: {},
       showSettings: false,
       currentView: 'timer',
+      debugInfo: [],
+      
+      // Debug Actions
+      addDebugInfo: (info: string) => {
+        const timestamp = new Date().toLocaleTimeString();
+        set(state => ({
+          debugInfo: [...state.debugInfo.slice(-9), `${timestamp}: ${info}`] // 最新10件のみ保持
+        }));
+      },
+      
+      clearDebugInfo: () => {
+        set({ debugInfo: [] });
+      },
       
       // Timer Actions
       setMode: (mode) => {
@@ -95,6 +113,7 @@ export const useAppStore = create<AppStore>()(
       
       startTimer: () => {
         set({ isRunning: true });
+        get().addDebugInfo('タイマー開始！');
       },
       
       pauseTimer: () => {
@@ -120,10 +139,6 @@ export const useAppStore = create<AppStore>()(
       
       tick: () => {
         const state = get();
-        // tick処理のデバッグ（最初の5回と終了間際のみ表示）
-        if (state.timeLeft <= 5 || state.timeLeft >= 55) {
-          console.log(`🔍 DEBUG: tick - isRunning=${state.isRunning}, timeLeft=${state.timeLeft}`);
-        }
         
         if (state.isRunning && state.timeLeft > 0) {
           const newTimeLeft = state.timeLeft - 1;
@@ -132,13 +147,17 @@ export const useAppStore = create<AppStore>()(
           
           // タイマー終了のデバッグ
           if (newTimeLeft <= 5) {
-            console.log(`🔍 DEBUG: タイマー残り${newTimeLeft}秒`);
+            get().addDebugInfo(`タイマー残り${newTimeLeft}秒`);
           }
           
           if (newTimeLeft === 0) {
-            console.log('🔍 DEBUG: tick処理でcompleteSession呼び出し');
-            alert('🔍 DEBUG: tick処理でタイマー終了！completeSession呼び出し');
+            get().addDebugInfo('tick処理でcompleteSession呼び出し');
             get().completeSession();
+          }
+        } else {
+          // 動かない理由をデバッグ
+          if (state.timeLeft <= 5) {
+            get().addDebugInfo(`tick: isRunning=${state.isRunning}, timeLeft=${state.timeLeft}`);
           }
         }
       },
@@ -163,6 +182,8 @@ export const useAppStore = create<AppStore>()(
       
       completeSession: () => {
         const state = get();
+        
+        get().addDebugInfo('セッション完了！自動開始判定開始');
         
         const session: PomodoroSession = {
           id: generateId(),
@@ -190,9 +211,6 @@ export const useAppStore = create<AppStore>()(
           enableBrowserNotification: state.settings.enableBrowserNotification,
           soundVolume: state.settings.soundVolume
         });
-        
-        console.log('📱 セッション完了 - 自動開始判定開始');
-        alert('🔍 DEBUG: セッション完了！自動開始判定開始');
         console.log('📱 現在の設定（詳細）:', {
           autoStartBreak: state.settings.autoStartBreak,
           autoStartPomodoro: state.settings.autoStartPomodoro,
@@ -223,16 +241,13 @@ export const useAppStore = create<AppStore>()(
           console.log(`📱 休憩判定: autoStartBreak=${state.settings.autoStartBreak}, nextMode=${nextMode}`);
           
           if (state.settings.autoStartBreak) {
-            console.log(`📱 休憩自動開始を実行: ${nextMode}`);
+            get().addDebugInfo(`休憩自動開始実行: ${nextMode}`);
             
-            console.log('✅ 休憩自動開始を実行（スマホ判定なし）');
-            alert(`🔍 DEBUG: 休憩自動開始実行中 - ${nextMode}`);
             // モード変更
             get().setMode(nextMode);
             
             // 直接タイマー開始
-            console.log('🚀 直接タイマー開始');
-            alert('🔍 DEBUG: startTimer()実行');
+            get().addDebugInfo('startTimer()実行');
             get().startTimer();
           } else {
             console.log(`📱 休憩自動開始はOFF - 手動モードに設定: ${nextMode}`);

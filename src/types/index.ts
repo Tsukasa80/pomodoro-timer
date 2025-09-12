@@ -104,4 +104,7 @@ export interface AppState {
   // UI State
   showSettings: boolean;
   currentView: 'timer' | 'reports';
+  
+  // Debug State
+  debugInfo: string[];
 }
