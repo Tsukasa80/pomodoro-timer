@@ -79,7 +79,7 @@ export const useAppStore = create<AppStore>()(
       dailyReports: {},
       showSettings: false,
       currentView: 'timer',
-      debugInfo: [],
+      debugInfo: [`${new Date().toLocaleTimeString()}: アプリ初期化完了`],
       
       // Debug Actions
       addDebugInfo: (info: string) => {
@@ -108,6 +108,7 @@ export const useAppStore = create<AppStore>()(
           isRunning: false 
         });
         
+        get().addDebugInfo(`モード変更: ${mode} (${duration}分)`);
         updateDocumentTitle(mode, duration * 60);
       },
       
@@ -429,6 +430,7 @@ export const useAppStore = create<AppStore>()(
         todos: state.todos,
         dailyReports: state.dailyReports,
         completedPomodoros: state.completedPomodoros,
+        // debugInfoは永続化しない
       }),
     }
   )
