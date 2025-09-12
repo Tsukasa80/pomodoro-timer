@@ -120,12 +120,24 @@ export const useAppStore = create<AppStore>()(
       
       tick: () => {
         const state = get();
+        // tick処理のデバッグ（最初の5回と終了間際のみ表示）
+        if (state.timeLeft <= 5 || state.timeLeft >= 55) {
+          console.log(`🔍 DEBUG: tick - isRunning=${state.isRunning}, timeLeft=${state.timeLeft}`);
+        }
+        
         if (state.isRunning && state.timeLeft > 0) {
           const newTimeLeft = state.timeLeft - 1;
           set({ timeLeft: newTimeLeft });
           updateDocumentTitle(state.currentMode, newTimeLeft);
           
+          // タイマー終了のデバッグ
+          if (newTimeLeft <= 5) {
+            console.log(`🔍 DEBUG: タイマー残り${newTimeLeft}秒`);
+          }
+          
           if (newTimeLeft === 0) {
+            console.log('🔍 DEBUG: tick処理でcompleteSession呼び出し');
+            alert('🔍 DEBUG: tick処理でタイマー終了！completeSession呼び出し');
             get().completeSession();
           }
         }
@@ -136,8 +148,15 @@ export const useAppStore = create<AppStore>()(
         const state = get();
         updateDocumentTitle(state.currentMode, timeLeft);
         
+        // デバッグ情報
+        if (timeLeft <= 5) {
+          console.log(`🔍 DEBUG: setTimeLeft - 残り${timeLeft}秒, isRunning=${state.isRunning}`);
+        }
+        
         // タイマー終了時は自動的にcompleteSessionを呼ぶ
         if (timeLeft === 0 && state.isRunning) {
+          console.log('🔍 DEBUG: setTimeLeft処理でcompleteSession呼び出し');
+          alert('🔍 DEBUG: setTimeLeft処理でタイマー終了！completeSession呼び出し');
           get().completeSession();
         }
       },
