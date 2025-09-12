@@ -134,6 +134,13 @@ const Timer: React.FC = () => {
     // バイブレーションを有効化（ユーザーアクション）
     enableVibrationOnUserAction();
     
+    // スマホでの自動開始を有効化（ユーザージェスチャーが必要）
+    if ('ontouchstart' in window) {
+      console.log('📱 スマホユーザーアクション検出 - 自動開始機能を有効化');
+      // タッチデバイスでのユーザーアクションを記録
+      window.sessionStorage.setItem('pomodoro-user-gesture', 'true');
+    }
+    
     if (isRunning) {
       pauseTimer();
     } else {
@@ -255,6 +262,13 @@ const Timer: React.FC = () => {
           <div className="text-gray-500 mt-1">
             Wake Lock: {wakeLockSupportedRef.current ? '✅ 対応' : '❌ 非対応'} |
             タブ状態: {isTabVisibleRef.current ? '👁️ アクティブ' : '🙈 非アクティブ'}
+          </div>
+          <div className="text-gray-500 mt-1">
+            自動開始: {'ontouchstart' in window ? 
+              (window.sessionStorage.getItem('pomodoro-user-gesture') === 'true' ? 
+                '✅ 有効' : '⏳ ユーザーアクション待ち') : 
+              '✅ デスクトップ対応'} |
+            デバイス: {'ontouchstart' in window ? '📱 モバイル' : '💻 デスクトップ'}
           </div>
         </div>
       )}

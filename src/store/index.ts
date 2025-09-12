@@ -173,7 +173,6 @@ export const useAppStore = create<AppStore>()(
           soundVolume: state.settings.soundVolume
         });
         
-        let shouldAutoStart = false;
         
         if (state.currentMode === 'pomodoro') {
           const newCompletedPomodoros = state.completedPomodoros + 1;
@@ -194,28 +193,41 @@ export const useAppStore = create<AppStore>()(
           const nextMode = shouldLongBreak ? 'long-break' : 'short-break';
           
           if (state.settings.autoStartBreak) {
+            console.log(`📱 休憩自動開始: ${nextMode}`);
             get().setMode(nextMode);
-            get().startTimer();
-            shouldAutoStart = true;
+            
+            // スマホ対応: 少し遅延をかけて確実に開始
+            setTimeout(() => {
+              const currentState = get();
+              if (currentState.currentMode === nextMode && !currentState.isRunning) {
+                console.log('📱 遅延自動開始: 休憩タイマー開始');
+                get().startTimer();
+              }
+            }, 100);
           } else {
             get().setMode(nextMode);
           }
         } else {
           // Auto-switch back to pomodoro
           if (state.settings.autoStartPomodoro) {
+            console.log('📱 ポモドーロ自動開始');
             get().setMode('pomodoro');
-            get().startTimer();
-            shouldAutoStart = true;
+            
+            // スマホ対応: 少し遅延をかけて確実に開始
+            setTimeout(() => {
+              const currentState = get();
+              if (currentState.currentMode === 'pomodoro' && !currentState.isRunning) {
+                console.log('📱 遅延自動開始: ポモドーロタイマー開始');
+                get().startTimer();
+              }
+            }, 100);
           } else {
             get().setMode('pomodoro');
           }
         }
         
-        // Only set isRunning to false if we didn't auto-start
-        if (!shouldAutoStart) {
-          set({ isRunning: false });
-        }
-      },
+        // 遅延自動開始の場合は一旦停止
+        set({ isRunning: false });
       },
       
       // Settings Actions
