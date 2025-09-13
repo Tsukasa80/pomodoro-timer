@@ -41,16 +41,17 @@ const Timer: React.FC = () => {
   const [showMobileDebug, setShowMobileDebug] = React.useState(false);
   
   const addDebugLog = (message: string) => {
-    // 従来のデバッグログ (開発環境のみ)
+    // 開発環境のみでデバッグログを出力
     if (process.env.NODE_ENV === 'development') {
+      // 従来のデバッグログ
       setDebugLogs(prev => {
         const newLogs = [...prev, `${new Date().toLocaleTimeString()}: ${message}`];
         return newLogs.slice(-5); // 最新5件のみ保持
       });
+      
+      // モバイル用デバッグログ
+      addMobileDebugLog(message);
     }
-    
-    // モバイル用デバッグログ (本番環境でも表示)
-    addMobileDebugLog(message);
   };
 
   // interval管理用のref
@@ -146,10 +147,12 @@ const Timer: React.FC = () => {
     
     // バイブレーション機能を削除しました
     
-    // モバイル用デバッグログの購読
-    const unsubscribeMobileDebugLogs = subscribeMobileDebugLogs((logs) => {
-      setMobileDebugLogs(logs);
-    });
+    // モバイル用デバッグログの購読（開発環境のみ）
+    const unsubscribeMobileDebugLogs = process.env.NODE_ENV === 'development' 
+      ? subscribeMobileDebugLogs((logs) => {
+          setMobileDebugLogs(logs);
+        })
+      : () => {}; // 本番環境では何もしない
     
     return () => {
       removeVisibilityHandler();
