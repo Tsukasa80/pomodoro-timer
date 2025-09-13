@@ -410,8 +410,8 @@ const Timer: React.FC = () => {
         </div>
       )}
       
-      {/* Mobile Debug Logs (本番環境でも表示) */}
-      {'ontouchstart' in window && mobileDebugLogs.length > 0 && (
+      {/* Mobile Debug Logs - 開発環境のみ表示 */}
+      {process.env.NODE_ENV === 'development' && 'ontouchstart' in window && mobileDebugLogs.length > 0 && (
         <div className="mt-4">
           <div className="flex justify-between items-center mb-3">
             <div className="text-blue-800 font-semibold text-sm">
