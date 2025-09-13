@@ -15,6 +15,10 @@ interface AppStore extends AppState {
   addDebugInfo: (info: string) => void;
   clearDebugInfo: () => void;
   
+  // Migration Info
+  migrationInfo: string | null;
+  clearMigrationInfo: () => void;
+  
   // Timer Actions
   setMode: (mode: TimerMode) => void;
   startTimer: () => void;
@@ -65,6 +69,58 @@ const defaultSettings = {
   soundVolume: 80,
 };
 
+// データバージョン管理
+const CURRENT_DATA_VERSION = "2.0.0"; // バグ修正後のバージョン
+const DATA_VERSION_KEY = "pomodoro-data-version";
+
+// マイグレーション関数
+const migrateData = (storedData: any, setMigrationInfo: (info: string) => void): any => {
+  const storedVersion = localStorage.getItem(DATA_VERSION_KEY) || "1.0.0";
+  
+  console.log(`🔄 データマイグレーション: ${storedVersion} → ${CURRENT_DATA_VERSION}`);
+  
+  // バージョン1.0.0からの移行（バグ修正前のデータ）
+  if (storedVersion === "1.0.0") {
+    console.log("📦 バグ修正前のデータを検出 - 設定をリセットして最新版に移行");
+    
+    const migrationMessage = "🔄 データをバグ修正版に更新しました！タイマー設定が最新版にリセットされ、無限ループ問題が解決されています。";
+    setMigrationInfo(migrationMessage);
+    
+    // 重要なデータは保持、問題のある設定はリセット
+    const migratedData = {
+      ...storedData,
+      settings: { ...defaultSettings }, // 設定は最新版にリセット
+      // todos と dailyReports は保持
+      completedPomodoros: storedData.completedPomodoros || 0,
+      migrationInfo: migrationMessage,
+    };
+    
+    // バージョン更新
+    localStorage.setItem(DATA_VERSION_KEY, CURRENT_DATA_VERSION);
+    
+    return migratedData;
+  }
+  
+  // 既に最新バージョンの場合はそのまま
+  if (storedVersion === CURRENT_DATA_VERSION) {
+    return storedData;
+  }
+  
+  // その他のバージョンは安全のため設定リセット
+  console.log("⚠️ 不明なバージョンのデータ - 安全のため設定をリセット");
+  
+  const migrationMessage = "⚠️ データを最新版に更新しました。安全のため設定をリセットしています。";
+  setMigrationInfo(migrationMessage);
+  
+  localStorage.setItem(DATA_VERSION_KEY, CURRENT_DATA_VERSION);
+  
+  return {
+    ...storedData,
+    settings: { ...defaultSettings },
+    migrationInfo: migrationMessage,
+  };
+};
+
 export const useAppStore = create<AppStore>()(
   persist(
     (set, get) => ({
@@ -80,6 +136,7 @@ export const useAppStore = create<AppStore>()(
       showSettings: false,
       currentView: 'timer',
       debugInfo: [`${new Date().toLocaleTimeString()}: アプリ初期化完了`],
+      migrationInfo: null,
       
       // Debug Actions
       addDebugInfo: (info: string) => {
@@ -91,6 +148,11 @@ export const useAppStore = create<AppStore>()(
       
       clearDebugInfo: () => {
         set({ debugInfo: [] });
+      },
+      
+      // Migration Actions
+      clearMigrationInfo: () => {
+        set({ migrationInfo: null });
       },
       
       // Timer Actions
@@ -476,6 +538,45 @@ export const useAppStore = create<AppStore>()(
         completedPomodoros: state.completedPomodoros,
         // debugInfoは永続化しない
       }),
+      onRehydrateStorage: () => {
+        console.log('🔄 データ復元開始 - バージョンチェック実行');
+        
+        // 初回実行時にバージョンを設定
+        if (!localStorage.getItem(DATA_VERSION_KEY)) {
+          console.log('🆕 初回実行 - データバージョンを設定');
+          localStorage.setItem(DATA_VERSION_KEY, CURRENT_DATA_VERSION);
+        }
+        
+        return (state, error) => {
+          if (error) {
+            console.error('❌ データ復元エラー:', error);
+            // エラー時は最新バージョンに設定
+            localStorage.setItem(DATA_VERSION_KEY, CURRENT_DATA_VERSION);
+            return;
+          }
+          
+          if (state) {
+            console.log('✅ データ復元完了 - マイグレーション確認');
+            
+            // マイグレーション実行
+            const setMigrationInfo = (info: string) => {
+              // ストアの更新は次のtickで実行
+              setTimeout(() => {
+                useAppStore.setState({ migrationInfo: info });
+              }, 100);
+            };
+            
+            const migratedState = migrateData(state, setMigrationInfo);
+            
+            // マイグレーションが発生した場合は状態更新
+            if (migratedState !== state) {
+              console.log('🔄 マイグレーション実行 - 状態更新');
+              // 必要に応じてストアを更新
+              Object.assign(state, migratedState);
+            }
+          }
+        };
+      },
     }
   )
 );

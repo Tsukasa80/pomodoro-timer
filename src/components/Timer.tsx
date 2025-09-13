@@ -27,6 +27,8 @@ const Timer: React.FC = () => {
     requestNotificationPermission,
     debugInfo,
     clearDebugInfo,
+    migrationInfo,
+    clearMigrationInfo,
   } = useAppStore();
   
   const backgroundTimerRef = useRef<BackgroundTimer>(new BackgroundTimer());
@@ -186,6 +188,29 @@ const Timer: React.FC = () => {
 
   return (
     <div className="relative">
+      {/* Migration Info Notification */}
+      {migrationInfo && (
+        <div className="mb-6 p-4 bg-gradient-to-r from-blue-100 to-indigo-100 border border-blue-300 rounded-2xl shadow-lg">
+          <div className="flex items-start justify-between">
+            <div className="flex-1">
+              <div className="text-blue-800 font-bold text-sm mb-2">
+                📦 データ更新通知
+              </div>
+              <div className="text-blue-700 text-sm leading-relaxed">
+                {migrationInfo}
+              </div>
+            </div>
+            <button
+              onClick={clearMigrationInfo}
+              className="ml-3 text-blue-600 hover:text-blue-800 font-bold text-lg"
+              aria-label="通知を閉じる"
+            >
+              ×
+            </button>
+          </div>
+        </div>
+      )}
+      
       {/* Background Gradient Card */}
       <div className={`relative bg-gradient-to-br ${
         currentMode === 'pomodoro' 
