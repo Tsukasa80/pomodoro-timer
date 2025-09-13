@@ -153,20 +153,37 @@ export const useAppStore = create<AppStore>()(
       },
       
       tick: () => {
-        const state = get();
-        
-        // 無限ループを防ぐため、まずタイマーが実際に動作中かチェック
-        if (!state.isRunning) {
+        // 最新の状態を再確認（Zustandの状態更新遅延対策）
+        const currentState = get();
+        if (!currentState.isRunning) {
           get().addDebugInfo('tick: タイマー停止中のため処理スキップ');
           return;
         }
         
-        get().addDebugInfo(`tick: isRunning=${state.isRunning}, timeLeft=${state.timeLeft}`);
+        get().addDebugInfo(`tick: isRunning=${currentState.isRunning}, timeLeft=${currentState.timeLeft}`);
         
-        if (state.timeLeft > 0) {
-          const newTimeLeft = state.timeLeft - 1;
+        // timeLeft=0の場合は即座に処理を停止
+        if (currentState.timeLeft <= 0) {
+          get().addDebugInfo('⚠️ 緊急停止: timeLeft=0でtick実行 → 強制停止');
+          set({ isRunning: false, timeLeft: 0 });
+          
+          // completeSessionは一度だけ実行する仕組み
+          const hasAlreadyCompleted = window.sessionStorage.getItem('session-completing');
+          if (!hasAlreadyCompleted) {
+            window.sessionStorage.setItem('session-completing', 'true');
+            setTimeout(() => {
+              get().completeSession();
+              window.sessionStorage.removeItem('session-completing');
+            }, 100);
+          }
+          return;
+        }
+        
+        // 正常なtick処理
+        if (currentState.timeLeft > 0) {
+          const newTimeLeft = currentState.timeLeft - 1;
           set({ timeLeft: newTimeLeft });
-          updateDocumentTitle(state.currentMode, newTimeLeft);
+          updateDocumentTitle(currentState.currentMode, newTimeLeft);
           
           // タイマー終了のデバッグ
           if (newTimeLeft <= 5) {
@@ -174,16 +191,19 @@ export const useAppStore = create<AppStore>()(
           }
           
           if (newTimeLeft === 0) {
-            get().addDebugInfo('タイマー終了！completeSession呼び出し');
-            // 一度の操作でタイマー停止とセッション完了を実行
+            get().addDebugInfo('タイマー終了！セッション完了処理開始');
             set({ isRunning: false });
-            get().completeSession();
+            
+            // completeSessionの重複実行を防ぐ
+            const hasAlreadyCompleted = window.sessionStorage.getItem('session-completing');
+            if (!hasAlreadyCompleted) {
+              window.sessionStorage.setItem('session-completing', 'true');
+              setTimeout(() => {
+                get().completeSession();
+                window.sessionStorage.removeItem('session-completing');
+              }, 100);
+            }
           }
-        } else {
-          // timeLeft=0で isRunning=true の場合（異常状態）
-          get().addDebugInfo('異常状態検出：timeLeft=0 & isRunning=true → 強制停止');
-          set({ isRunning: false });
-          get().completeSession();
         }
       },
       

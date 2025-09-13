@@ -73,8 +73,17 @@ const Timer: React.FC = () => {
       // バックグラウンドタイマー開始
       backgroundTimerRef.current.start(timeLeft * 1000);
       
-      // tick関数を直接呼び出し（依存関係を避ける）
+      // tick関数を直接呼び出し（依存関係を避ける + 強制停止チェック）
       intervalRef.current = setInterval(() => {
+        // ストアの最新状態を直接確認して強制停止
+        const currentStore = useAppStore.getState();
+        if (!currentStore.isRunning || currentStore.timeLeft <= 0) {
+          if (intervalRef.current) {
+            clearInterval(intervalRef.current);
+            intervalRef.current = undefined;
+          }
+          return;
+        }
         tick();
       }, 1000);
     } else {
