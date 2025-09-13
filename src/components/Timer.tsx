@@ -347,8 +347,8 @@ const Timer: React.FC = () => {
         </div>
       )}
       
-      {/* Mobile Support Status - 常に表示（スマホのみ）*/}
-      {'ontouchstart' in window && (
+      {/* Mobile Support Status - 開発環境のみ表示 */}
+      {process.env.NODE_ENV === 'development' && 'ontouchstart' in window && (
         <div className="mt-4 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-2xl text-xs shadow-lg">
           <div className="text-blue-800 font-semibold mb-2">
             📱 モバイル自動開始状況:
