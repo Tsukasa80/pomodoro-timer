@@ -113,6 +113,20 @@ export const useAppStore = create<AppStore>()(
       },
       
       startTimer: () => {
+        const state = get();
+        
+        // 時間が0の場合は、現在のモードの時間をリセットしてから開始
+        if (state.timeLeft <= 0) {
+          const duration = state.currentMode === 'pomodoro' 
+            ? state.settings.pomodoro 
+            : state.currentMode === 'short-break' 
+            ? state.settings.shortBreak 
+            : state.settings.longBreak;
+          
+          get().addDebugInfo(`タイマー時間リセット: ${duration}分`);
+          set({ timeLeft: duration * 60 });
+        }
+        
         set({ isRunning: true });
         get().addDebugInfo('タイマー開始！');
       },
