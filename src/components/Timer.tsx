@@ -8,7 +8,6 @@ import {
   setupVisibilityChangeHandler, 
   BackgroundTimer
 } from '../utils/notifications';
-import { addMobileDebugLog, subscribeMobileDebugLogs, clearMobileDebugLogs } from '../utils/mobileDebug';
 
 const Timer: React.FC = () => {
   const {
@@ -25,8 +24,6 @@ const Timer: React.FC = () => {
     setMode,
     toggleSettings,
     requestNotificationPermission,
-    debugInfo,
-    clearDebugInfo,
     migrationInfo,
     clearMigrationInfo,
   } = useAppStore();
@@ -34,25 +31,6 @@ const Timer: React.FC = () => {
   const backgroundTimerRef = useRef<BackgroundTimer>(new BackgroundTimer());
   const isTabVisibleRef = useRef(true);
   const wakeLockSupportedRef = useRef(false);
-  
-  // デバッグログ用state
-  const [debugLogs, setDebugLogs] = React.useState<string[]>([]);
-  const [mobileDebugLogs, setMobileDebugLogs] = React.useState<string[]>([]);
-  const [showMobileDebug, setShowMobileDebug] = React.useState(false);
-  
-  const addDebugLog = (message: string) => {
-    // 開発環境のみでデバッグログを出力
-    if (process.env.NODE_ENV === 'development') {
-      // 従来のデバッグログ
-      setDebugLogs(prev => {
-        const newLogs = [...prev, `${new Date().toLocaleTimeString()}: ${message}`];
-        return newLogs.slice(-5); // 最新5件のみ保持
-      });
-      
-      // モバイル用デバッグログ
-      addMobileDebugLog(message);
-    }
-  };
 
   // interval管理用のref
   const intervalRef = useRef<NodeJS.Timeout | undefined>();
@@ -118,12 +96,10 @@ const Timer: React.FC = () => {
       
       if (hidden && isRunning) {
         console.log('📱 タブが非アクティブ - バックグラウンドタイマー継続');
-        addDebugLog('📱 バックグラウンド開始');
         // バックグラウンドタイマーで継続管理
         backgroundTimerRef.current.start(timeLeft * 1000);
       } else if (!hidden && isRunning) {
         console.log('📱 タブがアクティブに復帰');
-        addDebugLog('📱 フォアグラウンド復帰');
         
         // バックグラウンドタイマーから正確な残り時間を取得
         const actualTimeLeft = Math.max(0, Math.ceil(backgroundTimerRef.current.getRemainingTime() / 1000));
@@ -132,14 +108,12 @@ const Timer: React.FC = () => {
         
         if (actualTimeLeft !== timeLeft) {
           console.log(`⏰ 時間補正: ${timeLeft}秒 → ${actualTimeLeft}秒`);
-          addDebugLog(`⏰ 時間補正: ${timeLeft}→${actualTimeLeft}秒`);
           setTimeLeft(actualTimeLeft); // ストアの時間を正確な値に更新
         }
         
         // バックグラウンドタイマーが完了していて、まだセッションが継続中の場合
         if (backgroundTimerRef.current.isComplete() && actualTimeLeft === 0 && isRunning) {
           console.log('🎯 バックグラウンドでセッション完了を検出 - completeSession実行');
-          addDebugLog('🎯 セッション完了検出');
           setTimeLeft(0); // 確実に0に設定してcompleteSessionをトリガー
         }
       }
@@ -147,18 +121,11 @@ const Timer: React.FC = () => {
     
     // バイブレーション機能を削除しました
     
-    // モバイル用デバッグログの購読（開発環境のみ）
-    const unsubscribeMobileDebugLogs = process.env.NODE_ENV === 'development' 
-      ? subscribeMobileDebugLogs((logs) => {
-          setMobileDebugLogs(logs);
-        })
-      : () => {}; // 本番環境では何もしない
     
     return () => {
       removeVisibilityHandler();
       releaseWakeLock();
       backgroundTimerRef.current.stop();
-      unsubscribeMobileDebugLogs();
     };
   }, [settings.enableBrowserNotification, requestNotificationPermission]); // isRunning, timeLeft, tickを依存配列から除去
 
@@ -346,135 +313,6 @@ const Timer: React.FC = () => {
           </div>
           <div className="text-sm text-green-100 mt-2 font-medium">
             お疲れ様でした！次のセッションを開始してください✨
-          </div>
-        </div>
-      )}
-      
-      {/* Mobile Support Status - 開発環境のみ表示 */}
-      {process.env.NODE_ENV === 'development' && 'ontouchstart' in window && (
-        <div className="mt-4 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-2xl text-xs shadow-lg">
-          <div className="text-blue-800 font-semibold mb-2">
-            📱 モバイル自動開始状況:
-          </div>
-          <div className="text-blue-700 space-y-2 bg-white p-3 rounded-xl">
-            <div className="flex items-center space-x-2">
-              <span className={window.sessionStorage.getItem('pomodoro-user-gesture') === 'true' ? 'text-green-600' : 'text-orange-600'}>
-                {window.sessionStorage.getItem('pomodoro-user-gesture') === 'true' ? '✅' : '⏳'}
-              </span>
-              <span className="font-medium">
-                自動開始: {window.sessionStorage.getItem('pomodoro-user-gesture') === 'true' ? '有効' : 'ユーザーアクション待ち'}
-              </span>
-            </div>
-            <div className="flex items-center space-x-2">
-              <span className={wakeLockSupportedRef.current ? 'text-green-600' : 'text-red-600'}>
-                {wakeLockSupportedRef.current ? '✅' : '❌'}
-              </span>
-              <span className="font-medium">Wake Lock: {wakeLockSupportedRef.current ? '対応' : '非対応'}</span>
-            </div>
-            <div className="flex items-center space-x-2">
-              <span className={isTabVisibleRef.current ? 'text-green-600' : 'text-orange-600'}>
-                {isTabVisibleRef.current ? '👁️' : '🙈'}
-              </span>
-              <span className="font-medium">タブ状態: {isTabVisibleRef.current ? 'アクティブ' : '非アクティブ'}</span>
-            </div>
-            <div className="text-blue-600 font-medium text-center mt-2">
-              自動開始が動作しない場合は、画面をタップしてください
-            </div>
-          </div>
-        </div>
-      )}
-      
-      {/* Desktop Support Status - 開発環境のみ */}
-      {process.env.NODE_ENV === 'development' && !('ontouchstart' in window) && (
-        <div className="mt-4 p-4 bg-gradient-to-r from-gray-50 to-blue-50 border border-gray-200 rounded-2xl text-xs shadow-lg">
-          <div className="text-gray-700 font-semibold mb-2">
-            💻 デスクトップ対応状況:
-          </div>
-          <div className="text-gray-600 space-y-1">
-            <div>Wake Lock: {wakeLockSupportedRef.current ? '✅ 対応' : '❌ 非対応'} | タブ状態: {isTabVisibleRef.current ? '👁️ アクティブ' : '🙈 非アクティブ'}</div>
-            <div>自動開始: ✅ デスクトップ対応</div>
-          </div>
-        </div>
-      )}
-      
-      {/* Debug Logs (開発環境) */}
-      {process.env.NODE_ENV === 'development' && debugLogs.length > 0 && (
-        <div className="mt-4 p-4 bg-gradient-to-r from-yellow-50 to-orange-50 border border-yellow-200 rounded-2xl shadow-lg">
-          <div className="text-yellow-800 font-semibold text-xs mb-3">
-            🐛 デバッグログ (最新5件):
-          </div>
-          <div className="space-y-1">
-            {debugLogs.map((log, index) => (
-              <div key={index} className="text-yellow-700 text-xs font-mono bg-white bg-opacity-60 p-2 rounded">
-                {log}
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-      
-      {/* Mobile Debug Logs - 開発環境のみ表示 */}
-      {process.env.NODE_ENV === 'development' && 'ontouchstart' in window && mobileDebugLogs.length > 0 && (
-        <div className="mt-4">
-          <div className="flex justify-between items-center mb-3">
-            <div className="text-blue-800 font-semibold text-sm">
-              📱 デバッグ情報 (最新10件):
-            </div>
-            <div className="flex space-x-2">
-              <button
-                onClick={() => setShowMobileDebug(!showMobileDebug)}
-                className="text-xs px-3 py-2 bg-gradient-to-r from-blue-100 to-blue-200 text-blue-700 rounded-xl hover:from-blue-200 hover:to-blue-300 transition-all duration-300 shadow-md"
-              >
-                {showMobileDebug ? '非表示' : '表示'}
-              </button>
-              <button
-                onClick={clearMobileDebugLogs}
-                className="text-xs px-3 py-2 bg-gradient-to-r from-red-100 to-red-200 text-red-700 rounded-xl hover:from-red-200 hover:to-red-300 transition-all duration-300 shadow-md"
-              >
-                クリア
-              </button>
-            </div>
-          </div>
-          {showMobileDebug && (
-            <div className="p-4 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-2xl max-h-40 overflow-y-auto shadow-lg">
-              <div className="space-y-2">
-                {mobileDebugLogs.map((log, index) => (
-                  <div key={index} className="text-blue-800 text-xs font-mono break-words bg-white bg-opacity-60 p-2 rounded">
-                    {log}
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* Store Debug Info - 開発環境のみ表示 */}
-      {process.env.NODE_ENV === 'development' && (
-        <div className="mt-4 p-4 bg-gradient-to-r from-yellow-50 to-orange-50 border border-yellow-200 rounded-2xl shadow-lg">
-          <div className="flex items-center justify-between mb-3">
-            <div className="text-yellow-800 font-semibold text-sm">
-              🔍 リアルタイムデバッグ情報:
-            </div>
-            <button
-              onClick={clearDebugInfo}
-              className="text-xs px-3 py-2 bg-gradient-to-r from-red-100 to-red-200 text-red-700 rounded-xl hover:from-red-200 hover:to-red-300 transition-all duration-300 shadow-md"
-            >
-              クリア
-            </button>
-          </div>
-          <div className="space-y-2 max-h-40 overflow-y-auto">
-            {debugInfo.length === 0 ? (
-              <div className="text-yellow-700 text-sm bg-white bg-opacity-60 p-3 rounded-xl">
-                デバッグ情報はまだありません。タイマーを開始してください。
-              </div>
-            ) : (
-              debugInfo.map((info, index) => (
-                <div key={index} className="text-yellow-800 text-sm font-mono bg-white bg-opacity-60 p-2 rounded-xl">
-                  {info}
-                </div>
-              ))
-            )}
           </div>
         </div>
       )}
