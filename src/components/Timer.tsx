@@ -421,33 +421,35 @@ const Timer: React.FC = () => {
         </div>
       )}
 
-      {/* Store Debug Info - スマホでも表示 */}
-      <div className="mt-4 p-4 bg-gradient-to-r from-yellow-50 to-orange-50 border border-yellow-200 rounded-2xl shadow-lg">
-        <div className="flex items-center justify-between mb-3">
-          <div className="text-yellow-800 font-semibold text-sm">
-            🔍 リアルタイムデバッグ情報:
-          </div>
-          <button
-            onClick={clearDebugInfo}
-            className="text-xs px-3 py-2 bg-gradient-to-r from-red-100 to-red-200 text-red-700 rounded-xl hover:from-red-200 hover:to-red-300 transition-all duration-300 shadow-md"
-          >
-            クリア
-          </button>
-        </div>
-        <div className="space-y-2 max-h-40 overflow-y-auto">
-          {debugInfo.length === 0 ? (
-            <div className="text-yellow-700 text-sm bg-white bg-opacity-60 p-3 rounded-xl">
-              デバッグ情報はまだありません。タイマーを開始してください。
+      {/* Store Debug Info - 開発環境のみ表示 */}
+      {process.env.NODE_ENV === 'development' && (
+        <div className="mt-4 p-4 bg-gradient-to-r from-yellow-50 to-orange-50 border border-yellow-200 rounded-2xl shadow-lg">
+          <div className="flex items-center justify-between mb-3">
+            <div className="text-yellow-800 font-semibold text-sm">
+              🔍 リアルタイムデバッグ情報:
             </div>
-          ) : (
-            debugInfo.map((info, index) => (
-              <div key={index} className="text-yellow-800 text-sm font-mono bg-white bg-opacity-60 p-2 rounded-xl">
-                {info}
+            <button
+              onClick={clearDebugInfo}
+              className="text-xs px-3 py-2 bg-gradient-to-r from-red-100 to-red-200 text-red-700 rounded-xl hover:from-red-200 hover:to-red-300 transition-all duration-300 shadow-md"
+            >
+              クリア
+            </button>
+          </div>
+          <div className="space-y-2 max-h-40 overflow-y-auto">
+            {debugInfo.length === 0 ? (
+              <div className="text-yellow-700 text-sm bg-white bg-opacity-60 p-3 rounded-xl">
+                デバッグ情報はまだありません。タイマーを開始してください。
               </div>
-            ))
-          )}
+            ) : (
+              debugInfo.map((info, index) => (
+                <div key={index} className="text-yellow-800 text-sm font-mono bg-white bg-opacity-60 p-2 rounded-xl">
+                  {info}
+                </div>
+              ))
+            )}
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 };
