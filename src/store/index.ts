@@ -274,15 +274,8 @@ export const useAppStore = create<AppStore>()(
         const state = get();
         updateDocumentTitle(state.currentMode, timeLeft);
         
-        // デバッグ情報
-        if (timeLeft <= 5) {
-          console.log(`🔍 DEBUG: setTimeLeft - 残り${timeLeft}秒, isRunning=${state.isRunning}`);
-        }
-        
         // タイマー終了時は自動的にcompleteSessionを呼ぶ
         if (timeLeft === 0 && state.isRunning) {
-          console.log('🔍 DEBUG: setTimeLeft処理でcompleteSession呼び出し');
-          alert('🔍 DEBUG: setTimeLeft処理でタイマー終了！completeSession呼び出し');
           get().completeSession();
         }
       },
@@ -318,14 +311,6 @@ export const useAppStore = create<AppStore>()(
           enableBrowserNotification: state.settings.enableBrowserNotification,
           soundVolume: state.settings.soundVolume
         });
-        console.log('📱 現在の設定（詳細）:', {
-          autoStartBreak: state.settings.autoStartBreak,
-          autoStartPomodoro: state.settings.autoStartPomodoro,
-          enableLongBreak: state.settings.enableLongBreak,
-          currentMode: state.currentMode,
-          completedPomodoros: state.completedPomodoros,
-          settings: state.settings // 全設定値を表示
-        });
         
         if (state.currentMode === 'pomodoro') {
           const newCompletedPomodoros = state.completedPomodoros + 1;
@@ -345,7 +330,6 @@ export const useAppStore = create<AppStore>()(
           const shouldLongBreak = state.settings.enableLongBreak && (newCompletedPomodoros % state.settings.longBreakInterval === 0);
           const nextMode = shouldLongBreak ? 'long-break' : 'short-break';
           
-          console.log(`📱 休憩判定: autoStartBreak=${state.settings.autoStartBreak}, nextMode=${nextMode}`);
           
           if (state.settings.autoStartBreak) {
             get().addDebugInfo(`休憩自動開始実行: ${nextMode}`);
@@ -357,23 +341,18 @@ export const useAppStore = create<AppStore>()(
             get().addDebugInfo('startTimer()実行');
             get().startTimer();
           } else {
-            console.log(`📱 休憩自動開始はOFF - 手動モードに設定: ${nextMode}`);
             get().setMode(nextMode);
           }
         } else {
           // Auto-switch back to pomodoro
-          console.log(`📱 ポモドーロ判定: autoStartPomodoro=${state.settings.autoStartPomodoro}`);
           
           if (state.settings.autoStartPomodoro) {
-            console.log('✅ ポモドーロ自動開始を実行（スマホ判定なし）');
             // モード変更
             get().setMode('pomodoro');
             
             // 直接タイマー開始
-            console.log('🚀 ポモドーロ直接タイマー開始');
             get().startTimer();
           } else {
-            console.log('📱 ポモドーロ自動開始はOFF - 手動モードに設定');
             get().setMode('pomodoro');
           }
         }
@@ -402,10 +381,7 @@ export const useAppStore = create<AppStore>()(
       },
       
       resetSettings: () => {
-        console.log('📱 設定をデフォルト値にリセット');
-        console.log('📱 リセット前:', get().settings);
         set({ settings: { ...defaultSettings } });
-        console.log('📱 リセット後:', get().settings);
       },
       
       // Todo Actions
