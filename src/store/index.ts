@@ -141,7 +141,15 @@ export const useAppStore = create<AppStore>()(
       tick: () => {
         const state = get();
         
-        if (state.isRunning && state.timeLeft > 0) {
+        // 無限ループを防ぐため、まずタイマーが実際に動作中かチェック
+        if (!state.isRunning) {
+          get().addDebugInfo('tick: タイマー停止中のため処理スキップ');
+          return;
+        }
+        
+        get().addDebugInfo(`tick: isRunning=${state.isRunning}, timeLeft=${state.timeLeft}`);
+        
+        if (state.timeLeft > 0) {
           const newTimeLeft = state.timeLeft - 1;
           set({ timeLeft: newTimeLeft });
           updateDocumentTitle(state.currentMode, newTimeLeft);
@@ -153,12 +161,13 @@ export const useAppStore = create<AppStore>()(
           
           if (newTimeLeft === 0) {
             get().addDebugInfo('タイマー終了！completeSession呼び出し');
-            set({ isRunning: false }); // タイマー停止
+            // 一度の操作でタイマー停止とセッション完了を実行
+            set({ isRunning: false });
             get().completeSession();
           }
-        } else if (state.isRunning && state.timeLeft <= 0) {
-          // 既にtimeLeft=0の場合の保険処理
-          get().addDebugInfo('保険処理：タイマー終了状態を検出');
+        } else {
+          // timeLeft=0で isRunning=true の場合（異常状態）
+          get().addDebugInfo('異常状態検出：timeLeft=0 & isRunning=true → 強制停止');
           set({ isRunning: false });
           get().completeSession();
         }
