@@ -51,8 +51,15 @@ const Timer: React.FC = () => {
     addMobileDebugLog(message);
   };
 
+  // interval管理用のref
+  const intervalRef = useRef<NodeJS.Timeout | undefined>();
+
   useEffect(() => {
-    let interval: NodeJS.Timeout | undefined;
+    // 既存のintervalをクリア
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = undefined;
+    }
     
     if (isRunning) {
       // Wake Lockを要求（スマホ対応）
@@ -66,7 +73,8 @@ const Timer: React.FC = () => {
       // バックグラウンドタイマー開始
       backgroundTimerRef.current.start(timeLeft * 1000);
       
-      interval = setInterval(() => {
+      // tick関数を直接呼び出し（依存関係を避ける）
+      intervalRef.current = setInterval(() => {
         tick();
       }, 1000);
     } else {
@@ -78,11 +86,12 @@ const Timer: React.FC = () => {
     }
     
     return () => {
-      if (interval) {
-        clearInterval(interval);
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = undefined;
       }
     };
-  }, [isRunning, tick]); // timeLeftを依存配列から除去
+  }, [isRunning]); // tickを依存配列から完全に除去
 
   // Component initialization
   useEffect(() => {
