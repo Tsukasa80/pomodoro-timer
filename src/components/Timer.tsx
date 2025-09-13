@@ -47,7 +47,7 @@ const Timer: React.FC = () => {
       requestWakeLock().then(success => {
         wakeLockSupportedRef.current = success;
         if (success) {
-          console.log('🔒 Wake Lock有効 - 画面消灯を防止');
+          console.log('Wake Lock有効 - 画面消灯を防止');
         }
       });
       
@@ -118,9 +118,6 @@ const Timer: React.FC = () => {
         }
       }
     });
-    
-    // バイブレーション機能を削除しました
-    
     
     return () => {
       removeVisibilityHandler();
